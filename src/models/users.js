@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       unique: true,
 
     },
-    frist_name: {
+    first_name: {
       type: DataTypes.STRING(20),
       allowNull: false,
     },
