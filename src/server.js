@@ -1,11 +1,11 @@
 require('dotenv').config();
 const app = require('./app');
-const mysqlSequelize = require('./config/db');
+const { sequelize } = require('./models');
 
 const startServer = async () => {
     try {
-        await mysqlSequelize.authenticate();
-
+        await sequelize.authenticate();
+        await sequelize.sync({ force: true });
         app.listen(process.env.PORT, () => {
             console.log(`Server running at http://localhost:${process.env.PORT} ✅`);
         })
