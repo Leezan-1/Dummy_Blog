@@ -5,7 +5,6 @@ const { Users } = require("../models").sequelize.models
 class UserService {
     static async signUpUser(userInfo) {
         console.log('UserService.signUpUser()');
-        console.log('userInfo :>> ', userInfo);
         try {
 
             let userExists = await Users.findOne({ where: { email: userInfo.email } })

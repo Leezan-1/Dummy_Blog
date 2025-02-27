@@ -5,8 +5,7 @@ const signUpController = wrapController(async (req, res) => {
     console.log('signUpController()');
 
     const user = await UserService.signUpUser(req.body);
-
-    res.json(user);
+    res.status(201).json(user);
 });
 
 module.exports = { signUpController };
