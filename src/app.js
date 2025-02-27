@@ -6,7 +6,7 @@ const app = express();
 // ROUTERS.
 const authRouter = require('./routes/authRoute');
 const blogsRouter = require('./routes/blogsRoute');
-
+const CustomError = require('./utils/CustomError')
 // MIDDLEWARES.
 app.use(express.json());
 
@@ -21,10 +21,14 @@ app.use(async (req, res) => {
 
 // ERROR MIDDLEWARE
 app.use(async (err, req, res, next) => {
-    if (err)
-        console.log('error :>> ', err);
+    let { message, statusCode } = err;
 
-    res.status(500).send('Internal Server error', err);
+    if (!(err instanceof CustomError)) {
+        console.log('error :>> ', err);
+        res.status(500).send('Internal Server error');
+    }
+
+    res.status(statusCode).json({ error: message });
 })
 
 module.exports = app;
