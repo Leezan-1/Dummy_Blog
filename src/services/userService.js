@@ -16,7 +16,7 @@ class UserService {
                 last_name: userInfo['lname'],
                 email: userInfo['email'],
                 password: userInfo['password']
-            })
+            });
 
             await user.save();
             return user;
