@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { signUpCTLR, loginUserCTLR, generateRefreshCTLR, logoutUserCTRL } = require('../controllers/authController');
 const { validateSignUpMW, validateLoginMW } = require('../middlewares/validationMiddleware');
-const { authTokenMW } = require('../middlewares/authentication');
+const { authTokenMW } = require('../middlewares/jwtMiddleware');
 
 router.route('/signup').post(validateSignUpMW, signUpCTLR);
 

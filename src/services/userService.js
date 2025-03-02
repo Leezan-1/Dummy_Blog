@@ -17,21 +17,26 @@ class UserService {
         });
 
         await user.save();
-        return JSON.parse(JSON.stringify(user));
-
     }
 
     static async loginUser(userInfo) {
-        let users = await Users.findOne({ where: { email: userInfo.email } })
-        if (!users)
+        let user = await Users.findOne({ where: { email: userInfo.email } })
+        if (!user)
             throw new CustomError('User Not Found', 404);
 
-        return JSON.parse(JSON.stringify(users));
+
+        // password logic need to be implemented
+        return JSON.parse(JSON.stringify(user));
 
     }
 
     static async logoutUser() {
 
+    }
+
+    static async getUserByEmail(email) {
+        const user = await Users.findOne({ where: { email: email } });
+        return JSON.parse(JSON.stringify(user));
     }
 }
 

@@ -88,15 +88,16 @@ class JWTService {
         console.log('this.checkValidAccess()');
         try {
             let decoded = jwt.verify(accToken, process.env.ACCESSTOKEN, { clockTimestamp: false, complete: false });
-            console.log('decoded :>> ', decoded);
-            return decoded;
+            const { iat, exp, ...userInfo } = decoded;
+            return userInfo;
 
         } catch (error) {
             throw new CustomError(error.message || "Invalid Token", 401);
         }
+    }
 
-
-
+    static async deleteRefreshByUserID(user_id) {
+        const refTokens = await RefreshTokens.destroy({ where: { users_id: user_id } });
     }
 }
 

@@ -7,7 +7,8 @@ const cookieparser = require('cookie-parser');
 // ROUTERS.
 const authRouter = require('./routes/authRoute');
 const blogsRouter = require('./routes/blogsRoute');
-const CustomError = require('./utils/CustomError')
+const CustomError = require('./utils/CustomError');
+const ApiResponse = require("./utils/apiMessage");
 // MIDDLEWARES.
 app.use(express.json());
 app.use(cookieparser());
@@ -27,10 +28,10 @@ app.use(async (err, req, res, next) => {
 
     if (!(err instanceof CustomError)) {
         console.log('error :>> ', err);
-        return res.status(500).send('Internal Server error');
+        return res.status(500).json(ApiResponse.failure(500, null, err));
     }
 
-    res.status(statusCode).json({ error: message });
+    res.status(statusCode).json(ApiResponse.failure(statusCode, message, err));
 })
 
 module.exports = app;
