@@ -9,7 +9,13 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate({ Posts }) {
+    static associate({ Posts, RefreshTokens }) {
+      this.hasMany(RefreshTokens, {
+        foreignKey: 'users_id',
+        allowNull: false,
+        onDelete: 'CASCADE'
+      });
+
       this.hasMany(Posts, {
         foreignKey: 'users_id',
         allowNull: false,
@@ -53,6 +59,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Users.prototype.toJSON = function () {
     return {
+      id: this.id,
       uuid: this.uuid,
       first_name: this.first_name,
       last_name: this.last_name,

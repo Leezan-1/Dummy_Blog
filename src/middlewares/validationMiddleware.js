@@ -2,7 +2,7 @@ const { validateName, validateEmail, validatePswd } = require('../utils/validati
 const { wrapMiddleware } = require('../utils/asyncwrappers');
 const CustomError = require('../utils/CustomError');
 
-const signUpValidationMW = wrapMiddleware(async (req, res, next) => {
+const validateSignUpMW = wrapMiddleware(async (req, res, next) => {
     console.log('signUpvalidationMW()');
 
     let { fname, lname, email, password } = req.body;
@@ -14,7 +14,7 @@ const signUpValidationMW = wrapMiddleware(async (req, res, next) => {
 }
 );
 
-const loginValidationMW = wrapMiddleware(async (req, res, next) => {
+const validateLoginMW = wrapMiddleware(async (req, res, next) => {
     console.log('loginValidationMW()');
 
     let { email, password } = req.body;
@@ -26,5 +26,5 @@ const loginValidationMW = wrapMiddleware(async (req, res, next) => {
     next();
 });
 
-module.exports = { signUpValidationMW, loginValidationMW };
+module.exports = { validateSignUpMW, validateLoginMW };
 

@@ -17,21 +17,22 @@ class UserService {
         });
 
         await user.save();
-        return user;
+        return JSON.parse(JSON.stringify(user));
 
     }
 
     static async loginUser(userInfo) {
-        let userExists = await Users.findOne({ where: { email: userInfo.email } })
-
-        if (!userExists)
+        let users = await Users.findOne({ where: { email: userInfo.email } })
+        if (!users)
             throw new CustomError('User Not Found', 404);
 
-        return userExists;
+        return JSON.parse(JSON.stringify(users));
 
     }
 
+    static async logoutUser() {
 
+    }
 }
 
 module.exports = UserService;

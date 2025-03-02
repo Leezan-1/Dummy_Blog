@@ -2,6 +2,7 @@
 // creating an express application
 const express = require("express");
 const app = express();
+const cookieparser = require('cookie-parser');
 
 // ROUTERS.
 const authRouter = require('./routes/authRoute');
@@ -9,6 +10,7 @@ const blogsRouter = require('./routes/blogsRoute');
 const CustomError = require('./utils/CustomError')
 // MIDDLEWARES.
 app.use(express.json());
+app.use(cookieparser());
 
 // ROUTES using Routers
 app.use('/auth', authRouter);
@@ -25,7 +27,7 @@ app.use(async (err, req, res, next) => {
 
     if (!(err instanceof CustomError)) {
         console.log('error :>> ', err);
-        res.status(500).send('Internal Server error');
+        return res.status(500).send('Internal Server error');
     }
 
     res.status(statusCode).json({ error: message });

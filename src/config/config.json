@@ -4,7 +4,8 @@
     "password": "7338",
     "database": "Blog_Post",
     "host": "localhost",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "logging": false
   },
   "test": {
     "username": "root",

@@ -5,8 +5,8 @@ const { sequelize } = require('./models');
 const startServer = async () => {
     try {
         await sequelize.authenticate();
-        // await sequelize.sync({ alter: true });
-        app.listen(process.env.PORT, () => {
+        // await sequelize.sync({ force: true });
+        app.listen(process.env.PORT || 3000, () => {
             console.log(`Server running at http://localhost:${process.env.PORT} ✅`);
         })
     } catch (error) {

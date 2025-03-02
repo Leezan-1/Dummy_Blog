@@ -6,8 +6,6 @@ function validateName(name) {
 function validateEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Standard email format validation
     let isValid = emailRegex.test(email);
-
-    console.log('email,isvalid :>> ', email, isValid);
     return isValid
 }
 
