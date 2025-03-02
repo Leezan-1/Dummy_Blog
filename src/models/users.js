@@ -13,11 +13,13 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(RefreshTokens, {
         foreignKey: 'users_id',
         allowNull: false,
+        as: 'tokens',
         onDelete: 'CASCADE'
       });
 
       this.hasMany(Posts, {
         foreignKey: 'users_id',
+        as: 'posts',
         allowNull: false,
       })
       // define association here

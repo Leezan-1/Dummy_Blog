@@ -12,12 +12,14 @@ module.exports = (sequelize, DataTypes) => {
     static associate({ Posts_Images, Tags }) {
       this.hasMany(Posts_Images, {
         foreignKey: 'posts_id',
+        as: 'images',
         allowNull: false,
         onDelete: 'CASCADE'
       },
         this.belongsToMany(Tags, {
           through: 'Posts_Tags',
           foreignKey: 'posts_id',
+          as: 'tags',
           otherKey: 'tags_id',
         })
       );
