@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
       unique: true,
       allowNull: false,
     },
+    slug: {
+      type: DataTypes.STRING,
+      unique: true,
+    },
     excerpt: {
       type: DataTypes.TEXT('tiny'),
     },

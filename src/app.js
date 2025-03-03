@@ -3,12 +3,13 @@
 const express = require("express");
 const app = express();
 const cookieparser = require('cookie-parser');
+const CustomError = require('./utils/CustomError');
+const ApiResponse = require("./utils/apiMessage");
 
 // ROUTERS.
 const authRouter = require('./routes/authRoute');
 const blogsRouter = require('./routes/blogsRoute');
-const CustomError = require('./utils/CustomError');
-const ApiResponse = require("./utils/apiMessage");
+
 // MIDDLEWARES.
 app.use(express.json());
 app.use(cookieparser());
@@ -27,7 +28,6 @@ app.use(async (err, req, res, next) => {
     let { message, statusCode } = err;
 
     if (!(err instanceof CustomError)) {
-        console.log('error :>> ', err);
         return res.status(500).json(ApiResponse.failure(500, null, err));
     }
 
