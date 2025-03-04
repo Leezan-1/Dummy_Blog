@@ -41,12 +41,15 @@ module.exports = (sequelize, DataTypes) => {
     slug: {
       type: DataTypes.STRING,
       unique: true,
+      allowNull: false,
     },
     excerpt: {
       type: DataTypes.TEXT('tiny'),
     },
     description: {
       type: DataTypes.TEXT,
+      allowNull: false,
+      defaultValue: 'No data here',
     },
     view_count: {
       type: DataTypes.INTEGER,

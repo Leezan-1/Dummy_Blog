@@ -2,30 +2,68 @@ const BlogService = require("../services/blogService");
 const ApiResponse = require("../utils/apiMessage");
 const { wrapController } = require("../utils/asyncwrappers");
 
-const getAllBlogsCTLR = wrapController(async (req, res) => {
-
-    // controller to get all the blogs from the database
+// controller to get all the blogs from the database
+const getAllPostsCTLR = wrapController(async (req, res) => {
 
     allPosts = await BlogService.getAllPosts();
     res.status(200).json(ApiResponse.success(200, null, allPosts));
 
 });
 
-const createUserBlogCTLR = wrapController(async (req, res) => {
+const getSinglePostCTLR = wrapController(async (req, res) => {
 
-    // controller that creates user blog entries
+
+    let post_slug = req.params?.post_slug;
+    //VALIDATE post's slug as slug.
+
+    let post_id = req.params?.post_id;
+    //VALIDATE post's id as integer
+
+    let post;
+
+    if (post_slug) {
+        post = await BlogService.getSinglePost(post_slug);
+    };
+
+    if (post_id) {
+        post = await BlogService.getSinglePostByID(post_id);
+    }
+
+    res.status(200).json(ApiResponse.success(200, null, post));
+});
+
+// controller that creates user blog entries
+const createNewPostCTLR = wrapController(async (req, res) => {
+
     const user = req.user;
+    await BlogService.createBlogPost(user, req.body);
+
+    res.status(201).json(ApiResponse.success(201, 'Post Created'));
+});
+
+// controller that updates user blog using post_id
+const updatePostCTLR = wrapController(async (req, res) => {
 
 });
 
-const getSinglePostCTLR = wrapController(async (req, res) => {
+// controller that delete posts using post_id;
+const deletePostCTLR = wrapController(async (req, res) => {
 
-    let post_uuid = req.params['post_uuid'];
+    const user = req.user;
+    const postId = req.params?.post_id;
+    // VALIDATE post's id to be post
 
-    let post = await BlogService.getSinglePost(post_uuid);
+    const postInfo = await BlogService.getSinglePostByID(postId);
 
-    console.log('post :>> ', post);
+    await BlogService.deleteBlogPost(user, postInfo);
+    res.status(200).json(ApiResponse.success(200, 'User deleted'));
 
-})
+});
 
-module.exports = { getAllBlogsCTLR, createUserBlogCTLR, getSinglePostCTLR };
+module.exports = {
+    getAllPostsCTLR,
+    getSinglePostCTLR,
+    createNewPostCTLR,
+    updatePostCTLR,
+    deletePostCTLR,
+};

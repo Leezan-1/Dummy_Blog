@@ -15,8 +15,10 @@ class ApiResponse {
         return {
             code: statusCode,
             success: false,
-            message: msg || getMessage(statusCode),
-            error: error
+            message: getMessage(statusCode),
+            error: {
+                reason: error.msg
+            }
         }
     }
 }

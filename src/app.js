@@ -11,6 +11,7 @@ const authRouter = require('./routes/authRoute');
 const blogsRouter = require('./routes/blogsRoute');
 
 // MIDDLEWARES.
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieparser());
 
@@ -28,6 +29,7 @@ app.use(async (err, req, res, next) => {
     let { message, statusCode } = err;
 
     if (!(err instanceof CustomError)) {
+        console.log('err :>> ', err);
         return res.status(500).json(ApiResponse.failure(500, null, err));
     }
 

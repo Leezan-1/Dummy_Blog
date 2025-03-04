@@ -4,7 +4,7 @@ const wrapController = function (controllerFunction) {
         try {
             return await controllerFunction(req, res);
         } catch (error) {
-            console.log('Controller Error:');
+            console.log('Controller Error:', error);
             next(error);
         }
     };

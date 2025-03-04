@@ -8,11 +8,11 @@ const { RefreshTokens } = require('../models').sequelize.models
 class JWTService {
 
     static checkTokenHeader(authHeader) {
-        console.log('checkTokenHeader()')
-        if (!authHeader || !authHeader.startsWith('Bearer '))
-            throw CustomError('token missing', 400);
 
-        return authHeader.split(' ')[1];
+        if (!authHeader || !authHeader.startsWith('Bearer '))
+            throw new CustomError('token missing', 400);
+
+        return authHeader.split(' ').filter(Boolean)[1];
     }
 
     static async genRefresh(userInfo) {
