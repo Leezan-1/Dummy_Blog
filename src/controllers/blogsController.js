@@ -5,7 +5,7 @@ const { wrapController } = require("../utils/asyncwrappers");
 // controller to get all the blogs from the database
 const getAllPostsCTLR = wrapController(async (req, res) => {
 
-    allPosts = await BlogService.getAllPosts();
+    const allPosts = await BlogService.getAllPosts();
     res.status(200).json(ApiResponse.success(200, null, allPosts));
 
 });
@@ -13,17 +13,17 @@ const getAllPostsCTLR = wrapController(async (req, res) => {
 const getSinglePostCTLR = wrapController(async (req, res) => {
 
 
-    let post_slug = req.params?.post_slug;
-    //VALIDATE post's slug as slug.
+    // let post_slug = req.params?.post_slug;
+    // //VALIDATE post's slug as slug.
 
     let post_id = req.params?.post_id;
     //VALIDATE post's id as integer
 
     let post;
 
-    if (post_slug) {
-        post = await BlogService.getSinglePost(post_slug);
-    };
+    // if (post_slug) {
+    //     post = await BlogService.getSinglePost(post_slug);
+    // };
 
     if (post_id) {
         post = await BlogService.getSinglePostByID(post_id);
@@ -44,6 +44,14 @@ const createNewPostCTLR = wrapController(async (req, res) => {
 // controller that updates user blog using post_id
 const updatePostCTLR = wrapController(async (req, res) => {
 
+    const user = req.user;
+    const postId = req.params?.post_id;
+
+    const postInfo = await BlogService.getSinglePostByID(postId);
+
+    await BlogService.updateBlogPost(user, postInfo, req.body);
+
+    res.status(200).json(ApiResponse.success(200, 'User updated successfully'));
 });
 
 // controller that delete posts using post_id;

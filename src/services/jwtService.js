@@ -17,7 +17,7 @@ class JWTService {
 
     static async genRefresh(userInfo) {
         console.log('genRefresh()');
-        let expiryTimeStamp = Date.now() + 3 * 24 * 60 * 60;
+        let expiryTimeStamp = Date.now() + 3 * 24 * 60 * 60 * 1000;
         const token = jwt.sign(userInfo, process.env.REFRESHTOKEN, { expiresIn: '3d' });
 
         await RefreshTokens.create({
@@ -32,6 +32,7 @@ class JWTService {
     static async genAccess(userInfo) {
         console.log('this.genAccess()');
         delete userInfo?.id;
+        console.log('userInfo :>> ', userInfo);
         const token = jwt.sign(userInfo, process.env.ACCESSTOKEN, { expiresIn: '2h' });
         return token;
     }
@@ -59,7 +60,6 @@ class JWTService {
                 throw new CustomError('Refresh token expired', 403);
             }
 
-            console.log('object :>> ', decoded);
             return decoded;
 
         } catch (error) {
@@ -69,7 +69,6 @@ class JWTService {
     }
 
     static async regenRefreshAndAccess(refToken) {
-        console.log('this.regenRefreshAndAccess()');
         const decoded = await this.checkValidRefresh(refToken);
 
         // Remove `exp` from the decoded token before re-signing
@@ -85,7 +84,7 @@ class JWTService {
     }
 
     static async checkValidAccess(accToken) {
-        console.log('this.checkValidAccess()');
+
         try {
             let decoded = jwt.verify(accToken, process.env.ACCESSTOKEN, { clockTimestamp: false, complete: false });
             const { iat, exp, ...userInfo } = decoded;
@@ -98,6 +97,10 @@ class JWTService {
 
     static async deleteRefreshByUserID(user_id) {
         const refTokens = await RefreshTokens.destroy({ where: { users_id: user_id } });
+
+        // if refTokens != 1 then it is an error
+        if (!refTokens)
+            throw new CustomError('refresh token couldnot be destroyed');
     }
 }
 

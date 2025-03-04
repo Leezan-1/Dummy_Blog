@@ -1,6 +1,8 @@
 const { Posts, Posts_Images, Posts_Tags, Tags } = require('../models').sequelize.models;
 const { default: slugify } = require('slugify');
 const CustomError = require('../utils/CustomError');
+const { Op } = require('sequelize');
+
 class BlogService {
 
     // gets all posts joining images and tags
@@ -52,8 +54,12 @@ class BlogService {
     // service that creates new blog post
     static async createBlogPost(userInfo, postInfo) {
 
-        postInfo.slug = slugify(postInfo.title, { strict: true, trim: true });
-        let postExist = await Posts.findOne({ where: { title: postInfo.title, slug: postInfo.slug } });
+        postInfo.slug = slugify(postInfo.title, { strict: true, trim: true, lower: true });
+        let postExist = await Posts.findOne({
+            where: {
+                [Op.or]: [{ title: postInfo.title }, { slug: postInfo.slug }]
+            }
+        });
         if (postExist)
             throw new CustomError('Post already exists', 406);
 
@@ -69,15 +75,50 @@ class BlogService {
         await post.save();
     }
 
+    // service that deletes the post by its id.
     static async deleteBlogPost(userInfo, postInfo) {
 
-        if (userInfo.id !== postInfo.users_id)
+        if (userInfo.id != postInfo.users_id)
             throw new CustomError('Invalid user trying to delete post', 401);
 
 
         let deleted = await Posts.destroy({ where: { id: postInfo.id } });
         if (!deleted)
             throw new CustomError('Couldn\'t delete post', 400);
+    }
+
+    static async updateBlogPost(userInfo, postInfo, updatedPostInfo) {
+        // Error if user isnot the author of post.
+        if (userInfo.id != postInfo.users_id)
+            throw new CustomError('Invalid user trying to update post', 401);
+
+        // generates and checks slug with updated title if it already exits
+        updatedPostInfo.slug = slugify(updatedPostInfo.title, { strict: true, trim: true });
+        let postExist = await Posts.findOne({
+            where: {
+                [Op.or]: [{ title: updatedPostInfo.title }, { slug: updatedPostInfo.slug }]
+            }
+        });
+
+        // if posts already exits, its an error!.
+        if (postExist)
+            throw new CustomError('Post already exists', 406);
+
+        let updatedPost = await Posts.update(
+            {
+                title: updatedPostInfo.title,
+                slug: updatedPostInfo.slug,
+                excerpt: updatedPostInfo.excerpt,
+                description: updatedPostInfo?.description,
+            },
+            { where: { id: postInfo.id } }
+        );
+
+        // if updated is not 1, then it is an error
+        if (!updatedPost)
+            throw new CustomError('Could not updated user data!', 400);
+
+        return updatedPost;
     }
 }
 
