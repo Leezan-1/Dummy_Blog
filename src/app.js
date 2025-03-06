@@ -3,8 +3,7 @@
 const express = require("express");
 const app = express();
 const cookieparser = require('cookie-parser');
-const CustomError = require('./utils/CustomError');
-const ApiResponse = require("./utils/apiMessage");
+const errorHandlerMW = require("./middlewares/errorMiddleware");
 
 // ROUTERS.
 const authRouter = require('./routes/authRoute');
@@ -19,22 +18,16 @@ app.use(cookieparser());
 app.use('/auth', authRouter);
 app.use('/blogs', blogsRouter);
 
+app.use('/public', express.static('public'));
+
 // 404 PAGE
 app.use(async (req, res) => {
     res.status(404).send('404! Route Not Found!');
 });
 
+
 // ERROR MIDDLEWARE
-app.use(async (err, req, res, next) => {
-    let { message, statusCode } = err;
-
-    if (!(err instanceof CustomError)) {
-        console.log('err :>> ', err);
-        return res.status(500).json(ApiResponse.failure(500, null, err));
-    }
-
-    res.status(statusCode).json(ApiResponse.failure(statusCode, message, err));
-})
+app.use(errorHandlerMW);
 
 module.exports = app;
 

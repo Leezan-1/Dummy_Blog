@@ -36,7 +36,8 @@ const getSinglePostCTLR = wrapController(async (req, res) => {
 const createNewPostCTLR = wrapController(async (req, res) => {
 
     const user = req.user;
-    await BlogService.createBlogPost(user, req.body);
+
+    await BlogService.createBlogPost(user, req.body, req.files);
 
     res.status(201).json(ApiResponse.success(201, 'Post Created'));
 });
@@ -49,7 +50,7 @@ const updatePostCTLR = wrapController(async (req, res) => {
 
     const postInfo = await BlogService.getSinglePostByID(postId);
 
-    await BlogService.updateBlogPost(user, postInfo, req.body);
+    await BlogService.updateBlogPost(user, postInfo, req.body, req.file);
 
     res.status(200).json(ApiResponse.success(200, 'User updated successfully'));
 });
@@ -68,10 +69,19 @@ const deletePostCTLR = wrapController(async (req, res) => {
 
 });
 
+const uploadImageCTLR = wrapController(async (req, res) => {
+    console.log('req.body', req.body);
+    console.log('req.files :>> ', req.files);
+
+
+    res.status(200).json(ApiResponse.success(200));
+});
+
 module.exports = {
     getAllPostsCTLR,
     getSinglePostCTLR,
     createNewPostCTLR,
     updatePostCTLR,
     deletePostCTLR,
+    uploadImageCTLR
 };
