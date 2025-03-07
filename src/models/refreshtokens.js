@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
     expiry: {
       type: DataTypes.BIGINT,
       allowNull: false,
+    },
+    users_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     }
   }, {
     sequelize,

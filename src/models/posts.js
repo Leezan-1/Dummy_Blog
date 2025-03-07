@@ -54,6 +54,10 @@ module.exports = (sequelize, DataTypes) => {
     view_count: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
+    },
+    users_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     }
 
   }, {

@@ -7,6 +7,7 @@ const { RefreshTokens } = require('../models').sequelize.models
 
 class JWTService {
 
+    // checks token headers.
     static checkTokenHeader(authHeader) {
 
         if (!authHeader || !authHeader.startsWith('Bearer '))
@@ -15,6 +16,7 @@ class JWTService {
         return authHeader.split(' ').filter(Boolean)[1];
     }
 
+    // generates refresh token
     static async genRefresh(userInfo) {
         console.log('genRefresh()');
         let expiryTimeStamp = Date.now() + 3 * 24 * 60 * 60 * 1000;
@@ -32,7 +34,6 @@ class JWTService {
     static async genAccess(userInfo) {
         console.log('this.genAccess()');
         delete userInfo?.id;
-        console.log('userInfo :>> ', userInfo);
         const token = jwt.sign(userInfo, process.env.ACCESSTOKEN, { expiresIn: '2h' });
         return token;
     }
