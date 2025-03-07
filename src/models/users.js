@@ -12,7 +12,6 @@ module.exports = (sequelize, DataTypes) => {
     static associate({ Posts, RefreshTokens }) {
       this.hasMany(RefreshTokens, {
         foreignKey: 'users_id',
-        allowNull: false,
         as: 'tokens',
         onDelete: 'CASCADE'
       });

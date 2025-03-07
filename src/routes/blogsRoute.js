@@ -8,7 +8,6 @@ const {
     createNewPostCTLR,
     deletePostCTLR,
     updatePostCTLR,
-    uploadImageCTLR
 } = require('../controllers/blogsController');
 
 

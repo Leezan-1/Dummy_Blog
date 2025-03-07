@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   RefreshTokens.init({
+
     token: {
       type: DataTypes.STRING(500),
       allowNull: false,

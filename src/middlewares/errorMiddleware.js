@@ -6,11 +6,14 @@ const fs = require('fs');
 const errorHandlerMW = async (err, req, res, next) => {
     let { message, statusCode } = err;
 
+
     if (req.files && req.files.length > 0) {
         for (const file of req.files) {
             fs.unlinkSync(file.path);
         }
     }
+    if (req.file)
+        fs.unlinkSync(req.file.path);
 
     if (!(err instanceof CustomError)) {
         if (err instanceof MulterError)

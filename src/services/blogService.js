@@ -72,8 +72,6 @@ class BlogService {
             users_id: userInfo.id
         });
 
-        console.log('post :>> ', post);
-
         let imageFiles = postImages.map((image) => ({
             posts_id: post.id,
             img_name: image.filename,
@@ -81,14 +79,7 @@ class BlogService {
         }));
 
         await Posts_Images.bulkCreate(imageFiles);
-        // postImages.forEach((images) => {
-        //     const post_image = await Posts_Images.build({
-        //         img_name: images.filename,
-        //         post_id: post.dataValues.id
-        //     });
-        // });
 
-        // await post.save();
     }
 
     // service that deletes the post by its id.

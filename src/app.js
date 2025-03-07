@@ -1,8 +1,13 @@
+const path = require("path");
 
 // creating an express application
 const express = require("express");
 const app = express();
+
+// importing cookie-parser
 const cookieparser = require('cookie-parser');
+
+// this middleware handles error for whole application
 const errorHandlerMW = require("./middlewares/errorMiddleware");
 
 // ROUTERS.
@@ -15,10 +20,15 @@ app.use(express.json());
 app.use(cookieparser());
 
 // ROUTES using Routers
+// routes that handles user login and session authentication
 app.use('/auth', authRouter);
-app.use('/blogs', blogsRouter);
 
-app.use('/public', express.static('public'));
+// routes that handles blog post management
+app.use('/api/blogs', blogsRouter);
+
+// Serving static files
+const publicDir = path.resolve(__dirname, 'public');
+app.use('/public', express.static(publicDir));
 
 // 404 PAGE
 app.use(async (req, res) => {
