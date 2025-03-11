@@ -34,7 +34,7 @@ class JWTService {
     static async genAccess(userInfo) {
         console.log('this.genAccess()');
         delete userInfo?.id;
-        const token = jwt.sign(userInfo, process.env.ACCESSTOKEN, { expiresIn: '2h' });
+        const token = jwt.sign(userInfo, process.env.ACCESSTOKEN, { expiresIn: '6h' });
         return token;
     }
 
@@ -64,7 +64,7 @@ class JWTService {
             return decoded;
 
         } catch (error) {
-            throw new CustomError(error.message, 403)
+            throw new CustomError(error, 403)
         }
 
     }

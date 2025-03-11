@@ -6,7 +6,6 @@ const {
     validatePswd,
     validatePostTitle,
     validatePostExcerpt,
-    validatePostDesc
 } = require('../utils/validations');
 
 

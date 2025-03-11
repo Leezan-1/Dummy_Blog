@@ -64,12 +64,12 @@ const logoutUserCTRL = wrapController(async (req, res) => {
 const generateRefreshCTLR = wrapController(async (req, res) => {
 
     // gets token from cookies else throws error
-    let token = req.cookies['refresh-token'];
-    if (!token)
-        throw new CustomError('Token missing!', 401);
+    // let token = req.cookies['refresh-token'];
+    // if (!token)
+    //     throw new CustomError('Token missing!', 401);
 
-    // let { authorization } = req.headers;
-    // const token = JWTService.checkTokenHeader(authorization);
+    let { authorization } = req.headers;
+    const token = JWTService.checkTokenHeader(authorization);
 
     // regenerates access and refresh token
     const { accessToken, refreshToken } = await JWTService.regenRefreshAndAccess(token);

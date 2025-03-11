@@ -15,11 +15,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Posts_Images.init({
-    img_name: { type: DataTypes.STRING },
+    img_name: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false,
+    },
     path: {
       type: DataTypes.STRING,
       allowNull: false,
-
     },
   }, {
     sequelize,

@@ -1,5 +1,6 @@
 const multer = require('multer');
 const path = require('path');
+const crypto = require('crypto');
 
 // config file filer where user can send only image file.
 const imageFileFilter = (req, file, cb) => {
@@ -17,8 +18,14 @@ const blogImageStorage = multer.diskStorage({
         cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
-        let fileName = `${Date.now()}-${file.originalname}`;
-        cb(null, fileName);
+
+        crypto.randomBytes(16, (err, buffer) => {
+            if (err)
+                cb(err);
+
+            let fileName = buffer.toString('hex') + '-' + file.originalname;
+            cb(null, fileName);
+        })
     }
 });
 
@@ -29,8 +36,13 @@ const userImageStorage = multer.diskStorage({
         cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
-        let fileName = `${Date.now()}-${file.originalname}`;
-        cb(null, fileName);
+        crypto.randomBytes(8, (err, buffer) => {
+            if (err)
+                cb(err);
+
+            let fileName = buffer.toString('hex') + '-' + file.originalname;
+            cb(null, fileName);
+        })
     }
 });
 

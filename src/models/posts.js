@@ -11,15 +11,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate({ Posts_Images, Tags }) {
       this.hasMany(Posts_Images, {
-        foreignKey: 'posts_id',
         as: 'images',
-        allowNull: false,
+        foreignKey: 'posts_id',
         onDelete: 'CASCADE'
       },
         this.belongsToMany(Tags, {
+          as: 'tags',
           through: 'Posts_Tags',
           foreignKey: 'posts_id',
-          as: 'tags',
           otherKey: 'tags_id',
         })
       );
@@ -48,8 +47,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     description: {
       type: DataTypes.TEXT,
-      allowNull: false,
-      defaultValue: 'No data here',
+      defaultValue: '',
     },
     view_count: {
       type: DataTypes.INTEGER,

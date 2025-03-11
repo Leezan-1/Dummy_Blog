@@ -3,6 +3,7 @@
     Every Controller is wrapped with wrapController()  that handles 
     error if any error is thrown.
 */
+const PostInfo = require("../resources/postInfo");
 const BlogService = require("../services/blogService");
 const ApiResponse = require("../utils/apiMessage");
 const { wrapController } = require("../utils/asyncwrappers");
@@ -26,17 +27,16 @@ const getSinglePostCTLR = wrapController(async (req, res) => {
     let post_id = req.params?.post_id;
     //VALIDATE post's id as integer
 
-    let post;
-
     // if (post_slug) {
     //     post = await BlogService.getSinglePost(post_slug);
     // };
 
     if (post_id) {
         post = await BlogService.getSinglePostByID(post_id);
+        await BlogService.updateBlogViewCount(post);
     }
 
-    res.status(200).json(ApiResponse.success(200, null, post));
+    res.status(200).json(ApiResponse.success(200, null, PostInfo.toPostObj(post)));
 });
 
 // controller that creates user blog entries
@@ -64,10 +64,10 @@ const updatePostCTLR = wrapController(async (req, res) => {
     const postInfo = await BlogService.getSinglePostByID(postId);
 
     // post is updated 
-    await BlogService.updateBlogPost(user, postInfo, req.body, req.file);
+    await BlogService.updateBlogPost(user, postInfo, req.body, req.files);
 
     // response is sent as json stating user is updated.
-    res.status(200).json(ApiResponse.success(200, 'User updated successfully'));
+    res.status(200).json(ApiResponse.success(200, 'Post updated successfully'));
 });
 
 // controller that delete posts using post_id;
@@ -85,7 +85,7 @@ const deletePostCTLR = wrapController(async (req, res) => {
     await BlogService.deleteBlogPost(user, postInfo);
 
     // sends api response as json object with message.
-    res.status(200).json(ApiResponse.success(200, 'User deleted'));
+    res.status(200).json(ApiResponse.success(200, 'Post deleted'));
 
 });
 

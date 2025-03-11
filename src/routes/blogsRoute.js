@@ -26,6 +26,6 @@ router.route('/:post_id')
     // .all(authTokenMW)
     //VALIDATE:add validation controller that validates post_id to be integer
     .delete(authTokenMW, deletePostCTLR)
-    .patch(authTokenMW, validatePostMW, updatePostCTLR);
+    .patch(authTokenMW, uploadBlogImagesMW, validatePostMW, updatePostCTLR);
 
 module.exports = router;
