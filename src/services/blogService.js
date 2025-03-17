@@ -1,11 +1,24 @@
 const fs = require('fs');
 const { Op } = require('sequelize');
+const crypto = require('crypto');
+const toJson = require('../utils/toJson');
 const { default: slugify } = require('slugify');
 const CustomError = require('../utils/CustomError');
-const toJson = require('../utils/toJson');
 const { Posts, Posts_Images, Posts_Tags, Tags } = require('../models').sequelize.models;
 
+async function generateSlug(title) {
+    let slug = slugify(title, { trim: true, lower: true, strict: true });
 
+    let buffer = await crypto.randomBytes(12)
+    slug += `-${buffer.toString('hex')}`;
+
+    return slug;
+}
+
+async function checkTags(tagArray) {
+    const tagInstance = await Promise.all(tagArray.map((tagName) => Tags.findOrCreate({ where: { name: tagName.trim() } })));
+    return tagInstance.map(([item]) => item);
+}
 
 class BlogService {
 
@@ -77,30 +90,27 @@ class BlogService {
     // service that creates new blog post
     static async createBlogPost(userInfo, formPostInfo, postImages) {
 
-        formPostInfo.slug = slugify(formPostInfo.title, { strict: true, trim: true, lower: true });
-        let postExist = await Posts.findOne({
-            where: {
-                [Op.or]: [{ title: formPostInfo.title }, { slug: formPostInfo.slug }]
-            }
-        });
-        if (postExist)
-            throw new CustomError('Post already exists', 401);
-
+        // generates slug
+        formPostInfo.slug = await generateSlug(formPostInfo.title);
+        const toAddTags = await checkTags(formPostInfo?.tags);
 
         const post = await Posts.create({
             title: formPostInfo.title,
             slug: formPostInfo.slug,
             excerpt: formPostInfo.excerpt,
             description: formPostInfo?.description,
-            users_id: userInfo.id
+            users_id: userInfo?.id
         });
 
+        // adds tags to the post associated with tags.
+        await post.setTags(toAddTags);
+
+        // add images to post_images table
         let imageFiles = postImages.map((image) => ({
             posts_id: post.id,
             img_name: image.filename,
             path: image.path
         }));
-
         await Posts_Images.bulkCreate(imageFiles);
 
     }
@@ -122,7 +132,7 @@ class BlogService {
         return (deleted) ? true : false;
     }
 
-    static async updateBlogPost(userInfo, postInfo, updatedPostInfo, images) {
+    static async updateBlogPost(userInfo, postInfo, updatePostInfo, images) {
 
         // Error if user isnot the author of post.
         if (userInfo.id != postInfo.users_id)
@@ -130,16 +140,20 @@ class BlogService {
 
         // check updated fields
         const updatedFields = {
-            excerpt: updatedPostInfo.excerpt,
-            description: updatedPostInfo.description,
-        }
+            excerpt: updatePostInfo.excerpt,
+            description: updatePostInfo.description,
+        };
+
+
 
         // If title is not same update slug and add to updated fields.
-        if (postInfo.title !== updatedPostInfo.title) {
-            updatedFields.title = updatedPostInfo.title;
-            updatedFields.slug = slugify(postInfo.title, { strict: true, trim: true, lower: true });
+        if (postInfo.title !== updatePostInfo.title) {
 
-            const postExist = await Posts.findOne({
+            //update title and also slug to new title.
+            updatedFields.title = updatePostInfo.title;
+            updatedFields.slug = await generateSlug(updatePostInfo.title);
+
+            let postExist = await Posts.findOne({
                 where: {
                     [Op.or]: [{ title: updatedFields.title }, { slug: updatedFields.slug }],
                     id: { [Op.ne]: postInfo.id }
@@ -149,22 +163,28 @@ class BlogService {
             if (postExist)
                 throw new CustomError('Post title and slug already exists!');
 
-
         }
 
         // update the fields of the post
         const updated = await Posts.update(updatedFields, {
             where: { id: postInfo.id }
         });
+
         if (!updated) {
             throw new CustomError('Couldnot update post', 400);
         }
+
+        const toAddTags = await checkTags(updatePostInfo?.tags);
+
+        // update tags too.
+        await updated.setTags(toAddTags);
 
         // previous img destroyed.!
         let prevImgDestroyed = await Posts_Images.destroy({ where: { posts_id: postInfo.id } });
         if (!prevImgDestroyed) {
             throw new CustomError('Couldnot update post', 200);
         }
+
 
         // every images is deleted
         postInfo.images.forEach((image) => {

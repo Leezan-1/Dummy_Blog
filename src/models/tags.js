@@ -20,7 +20,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Tags.init({
-    name: { type: DataTypes.STRING(15) }
+    name: {
+      type: DataTypes.STRING(15),
+      unique: true,
+      allowNull: false
+    }
 
   }, {
     sequelize,

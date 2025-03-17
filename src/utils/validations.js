@@ -27,7 +27,7 @@ function validatePostTitle(title) {
     // allowed characters : letters, numbers, spaces,  . , ! ? ' " -
     if (title && titleRegex.test(title))
         return true;
-    throw new CustomError('Invalid Post Title', 406);
+    throw new CustomError('Invalid Post Title: Title must be 10 - 100 character long.', 406);
 
 }
 
@@ -39,9 +39,16 @@ function validatePostExcerpt(excerpt) {
     if (excerpt && excerptRegex.test(excerpt)) {
         return true;
     }
-    throw new CustomError('Invalid Post Excerpt', 406);
+    throw new CustomError('Invalid Post Excerpt: Excerpt must be 30 to 150 character long.', 406);
 }
 
+function validateTagName(tagName) {
+    const tagNameRegex = /^[A-Za-z]{1,15}$/;
+    if (tagName && tagNameRegex.test(tagName))
+        return true;
+
+    throw new CustomError('Invalid Tag Name: Tag name must be aphabet and only 15 character long.', 400);
+}
 
 // validates description of blog post
 // function validatePostDesc(desc) {
@@ -54,4 +61,5 @@ module.exports = {
     validatePswd,
     validatePostTitle,
     validatePostExcerpt,
+    validateTagName
 }

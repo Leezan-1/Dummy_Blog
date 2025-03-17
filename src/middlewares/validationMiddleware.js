@@ -36,14 +36,18 @@ const validateLoginMW = wrapMiddleware(async (req, res, next) => {
 // middleware that validates the blog-post form.
 const validatePostMW = wrapMiddleware(async (req, res, next) => {
 
-    const { title, excerpt } = req.body;
+    const { title, excerpt, tags } = req.body;
 
+
+    //VALIDATE tags
     if (validatePostTitle(title) && validatePostExcerpt(excerpt))
         next();
     else
         throw new CustomError('Invalid form data provided', 406);
 
 });
+
+
 
 module.exports = { validateSignUpMW, validateLoginMW, validatePostMW };
 

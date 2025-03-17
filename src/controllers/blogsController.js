@@ -1,7 +1,7 @@
 /*
-    This controllers CRUD for blog post.
-    Every Controller is wrapped with wrapController()  that handles 
-    error if any error is thrown.
+This controllers CRUD for blog post.
+Every Controller is wrapped with wrapController()  that handles 
+error if any error is thrown.
 */
 const PostInfo = require("../resources/postInfo");
 const BlogService = require("../services/blogService");

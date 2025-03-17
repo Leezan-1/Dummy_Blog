@@ -7,7 +7,6 @@ const { wrapController } = require("../utils/asyncwrappers");
 const UserService = require('../services/userService');
 const JWTService = require("../services/jwtService");
 const ApiResponse = require("../utils/apiMessage");
-const CustomError = require("../utils/CustomError");
 
 // SignUp Controller: Handles user signup request 
 const signUpCTLR = wrapController(async (req, res) => {

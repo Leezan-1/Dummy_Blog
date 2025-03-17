@@ -13,6 +13,7 @@ const errorHandlerMW = require("./middlewares/errorMiddleware");
 // ROUTERS.
 const authRouter = require('./routes/authRoute');
 const blogsRouter = require('./routes/blogsRoute');
+const tagsRouter = require('./routes/tagsRoute');
 
 // MIDDLEWARES.
 app.use(express.urlencoded({ extended: false }));
@@ -25,6 +26,7 @@ app.use('/auth', authRouter);
 
 // routes that handles blog post management
 app.use('/api/blogs', blogsRouter);
+app.use('/api/tags', tagsRouter);
 
 // Serving static files
 const publicDir = path.resolve(__dirname, 'public');

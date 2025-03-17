@@ -1,7 +1,19 @@
 const express = require('express');
 const router = express.Router();
+const {
+    getAllTagsCTLR,
+    createNewTagCTLR,
+    updateTagCTLR,
+    deleteTagCTLR
+} = require('../controllers/tagsController');
 
-router.route('/').get();
-router.route('/create-tag').post();
-router.route('/:tag').patch()
+// only admins can get create,update or delete tags
+router.route('/').get(getAllTagsCTLR);
+
+router.route('/create-tag').post(createNewTagCTLR);
+
+router.route('/:tag')
+    .patch(updateTagCTLR)
+    .delete(deleteTagCTLR)
+
 module.exports = router;

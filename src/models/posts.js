@@ -34,7 +34,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     title: {
       type: DataTypes.STRING(50),
-      unique: true,
       allowNull: false,
     },
     slug: {
@@ -44,6 +43,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     excerpt: {
       type: DataTypes.TEXT('tiny'),
+      allowNull: false,
     },
     description: {
       type: DataTypes.TEXT,
