@@ -12,6 +12,9 @@ module.exports = (sequelize, DataTypes) => {
     static associate({ Posts }) {
 
       // define association here
+      this.belongsTo(Posts, {
+        foreignKey: 'posts_id',
+      })
     }
   }
   Posts_Images.init({

@@ -9,22 +9,30 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate({ Posts_Images, Tags }) {
+    static associate({ Posts_Images, Tags, Users }) {
+
+      // define association here
       this.hasMany(Posts_Images, {
         as: 'images',
         foreignKey: 'posts_id',
         onDelete: 'CASCADE'
-      },
+      }),
+
         this.belongsToMany(Tags, {
           as: 'tags',
           through: 'Posts_Tags',
           foreignKey: 'posts_id',
           otherKey: 'tags_id',
+        }),
+
+        this.belongsTo(Users, {
+          foreignKey: 'users_id',
+          as: 'author',
         })
-      );
-      // define association here
     }
+
   }
+
   Posts.init({
     uuid: {
       type: DataTypes.UUID,

@@ -30,7 +30,7 @@ const loginUserCTLR = wrapController(async (req, res) => {
     // after user authentication refresh token is generated 
     const refreshToken = await JWTService.genRefresh(user);
 
-    // unnecessary data is ommited 
+    // unnecessary data is omitted 
     delete user?.id;
     // The data is shared to access token.
     const accessToken = await JWTService.genAccess(user);
@@ -59,7 +59,7 @@ const logoutUserCTRL = wrapController(async (req, res) => {
         .json(ApiResponse.success(200, 'User logged out!'));
 });
 
-// Genereate Refresh Controller: Handles to regenerate to sustain user sessions
+// Generate Refresh Controller: Handles to regenerate to sustain user sessions
 const generateRefreshCTLR = wrapController(async (req, res) => {
 
     // gets token from cookies else throws error

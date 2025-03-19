@@ -1,4 +1,4 @@
-const { StatusCodes, getMessage } = require('http-status-code');
+const { getMessage } = require('http-status-code');
 
 class ApiResponse {
 

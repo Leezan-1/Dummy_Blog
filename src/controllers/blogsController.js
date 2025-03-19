@@ -5,22 +5,31 @@ error if any error is thrown.
 */
 const PostInfo = require("../resources/postInfo");
 const BlogService = require("../services/blogService");
-const ApiResponse = require("../utils/apiMessage");
-const { wrapController } = require("../utils/asyncwrappers");
+const { ApiResponse, wrapController, toJson } = require('../utils');
 
 // controller to get all the blogs from the database
 const getAllPostsCTLR = wrapController(async (req, res) => {
 
-    // service that getes all posts and its info with images
-    const allPosts = await BlogService.getAllPosts();
+    // VALIDATE req.query 
+    let page = Number(req.query?.page ?? 1);
+    let limit = Number(req.query?.limit ?? 10);
 
-    // All post retreived!
-    res.status(200).json(ApiResponse.success(200, null, allPosts));
+
+    // service that gets all posts and its info with images
+    const { allPosts, paginationData } = await BlogService.getAllPosts(page, limit);
+
+    const toUserResponse = {
+        metadata: paginationData,
+        posts: allPosts.map((posts) => PostInfo.toCollectionResponse(posts)),
+    }
+    // All post retrieved!
+    return res.status(200).json(ApiResponse.success(200, 'All Blogs Data Fetched!', toUserResponse));
 
 });
 
 const getSinglePostCTLR = wrapController(async (req, res) => {
 
+    let post;
     // let post_slug = req.params?.post_slug;
     // //VALIDATE post's slug as slug.
 
@@ -30,13 +39,12 @@ const getSinglePostCTLR = wrapController(async (req, res) => {
     // if (post_slug) {
     //     post = await BlogService.getSinglePost(post_slug);
     // };
-
     if (post_id) {
         post = await BlogService.getSinglePostByID(post_id);
-        await BlogService.updateBlogViewCount(post);
     }
 
-    res.status(200).json(ApiResponse.success(200, null, PostInfo.toPostObj(post)));
+    await BlogService.updateBlogViewCount(post.id);
+    res.status(200).json(ApiResponse.success(200, 'Blog Data Fetched!', PostInfo.toResponse(post)));
 });
 
 // controller that creates user blog entries
@@ -73,7 +81,7 @@ const updatePostCTLR = wrapController(async (req, res) => {
 // controller that delete posts using post_id;
 const deletePostCTLR = wrapController(async (req, res) => {
 
-    // user info is  from access tokenm post id from route parameter.
+    // user info is  from access token post id from route parameter.
     const user = req.user;
     const postId = req.params?.post_id;
     // VALIDATE post's id to be post

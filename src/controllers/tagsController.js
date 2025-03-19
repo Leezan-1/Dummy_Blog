@@ -31,8 +31,6 @@ const updateTagCTLR = wrapController(async (req, res) => {
 
     await TagService.updateTag(prevTagName, newTagName);
 
-
-
     res.status(200).json(ApiResponse.success(201, "Tag updated successfully"))
 });
 

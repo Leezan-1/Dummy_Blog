@@ -28,7 +28,6 @@ const errorHandlerMW = async (err, req, res, next) => {
     if (err instanceof SequelizeError)
         return res.status(500).json(ApiResponse.failure(500, "Database Error", err));
 
-    console.log('errorHandlerMW :>> ', err);
     return res.status(500).json(ApiResponse.failure(500, null, err));
 };
 

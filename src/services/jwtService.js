@@ -39,7 +39,6 @@ class JWTService {
     }
 
     static async checkValidRefresh(refToken) {
-        console.log('this.checkValidRefresh()');
         try {
             let decoded = jwt.verify(refToken, process.env.REFRESHTOKEN);
 
@@ -87,7 +86,7 @@ class JWTService {
     static async checkValidAccess(accToken) {
 
         try {
-            let decoded = jwt.verify(accToken, process.env.ACCESSTOKEN, { clockTimestamp: false, complete: false });
+            let decoded = jwt.verify(accToken, process.env.ACCESSTOKEN);
             const { iat, exp, ...userInfo } = decoded;
             return userInfo;
 
