@@ -4,10 +4,11 @@ const CustomError = require("../utils/CustomError");
 const { wrapMiddleware } = require("../utils/asyncwrappers");
 
 const authTokenMW = wrapMiddleware(async (req, res, next) => {
+    // get auth token form headers
     const { authorization } = req.headers;
 
-    let token = JWTService.checkTokenHeader(authorization);
-    let userInfo = await JWTService.checkValidAccess(token);
+    // check valid access token
+    let userInfo = await JWTService.checkValidAccess(authorization);
 
     let user = await UserService.getUserByEmail(userInfo.email);
 
@@ -15,6 +16,7 @@ const authTokenMW = wrapMiddleware(async (req, res, next) => {
         throw new CustomError('User not valid', 403);
     }
     req.user = user;
+    req.sessionId = userInfo.sessionId;
 
     next();
 });

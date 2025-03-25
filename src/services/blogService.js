@@ -22,12 +22,14 @@ class BlogService {
     static async getAllPosts(page, limit) {
 
         // pagination logic
+
         let totalPost = await Posts.count();
         const paginationData = pagination(totalPost, page, limit);
+        // offset is calculated later because we have to send data to 
         let offset = Math.floor((paginationData.currentPage - 1) * limit);
 
         const allPosts = await Posts.findAll({
-            attributes: ['id', 'uuid', 'title', 'slug', 'view_count', 'createdAt'],
+            attributes: ['id', 'uuid', 'title', 'slug', 'view_count', 'createdAt', 'visible', 'featured'],
             include: [
                 {
                     model: Users,

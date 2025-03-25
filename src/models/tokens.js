@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class RefreshTokens extends Model {
+  class Tokens extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -16,26 +16,38 @@ module.exports = (sequelize, DataTypes) => {
       })
     }
   }
-  RefreshTokens.init({
-
-    token: {
+  Tokens.init({
+    jti: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+      unique: true,
+    },
+    refresh_token: {
       type: DataTypes.STRING(500),
       allowNull: false,
       unique: true,
     },
-    expiry: {
+    refresh_tokens_expiry: {
       type: DataTypes.BIGINT,
       allowNull: false,
     },
     users_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    access_token: {
+      type: DataTypes.STRING(500),
+      allowNull: false,
+      unique: true,
     }
+
   }, {
     sequelize,
-    tableName: 'refresh_tokens',
-    modelName: 'RefreshTokens',
-    timestamps: false
+    tableName: 'tokens',
+    modelName: 'Tokens',
+    timestamps: false,
   });
-  return RefreshTokens;
+  return Tokens;
 };

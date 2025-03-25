@@ -42,6 +42,8 @@ class PostInfo {
             duration: toDuration(post.createdAt),
             images: post.images.map((img) => ({ img_name: img.img_name })),
             tags: post.tags.map((tag) => (tag.name)),
+            is_visible: post.visible,
+            is_featured: post.featured,
         }
     }
 
@@ -58,6 +60,8 @@ class PostInfo {
 
             duration: toDuration(post.createdAt),
             tags: post.tags.map((tag) => (tag.name)),
+            is_visible: post.visible,
+            is_featured: post.featured,
         };
     }
 

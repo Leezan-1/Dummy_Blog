@@ -8,6 +8,13 @@ const UserService = require('../services/userService');
 const JWTService = require("../services/jwtService");
 const ApiResponse = require("../utils/apiMessage");
 
+const COOKIE_OPTIONS = {
+    signed: true,
+    secure: true,
+    httpOnly: true,
+    sameSite: "strict",
+    expiry: Date.now() + 3 * 24 * 60 * 60 * 60 * 1000
+}
 // SignUp Controller: Handles user signup request 
 const signUpCTLR = wrapController(async (req, res) => {
 
@@ -28,57 +35,48 @@ const loginUserCTLR = wrapController(async (req, res) => {
     const user = await UserService.loginUser(req.body);
 
     // after user authentication refresh token is generated 
-    const refreshToken = await JWTService.genRefresh(user);
-
-    // unnecessary data is omitted 
-    delete user?.id;
-    // The data is shared to access token.
-    const accessToken = await JWTService.genAccess(user);
+    const { refreshToken, accessToken } = await JWTService.generateNewTokenPair(user);
 
     // response sends a cookie of refresh-token and a json object about user info along with access token.
+    const responseData = ApiResponse.success(200, 'User Logged In', { access_token: accessToken })
     res.status(200)
-        .cookie('refresh-token', refreshToken, { httpOnly: true, sameSite: "strict", expiry: Date.now() + 3 * 24 * 60 * 60 * 1000, secure: true })
-        .json({
-            user: user, access_token: accessToken
-        });
+        .cookie('refresh-token', refreshToken, COOKIE_OPTIONS)
+        .json(responseData);
 
 });
 
 // Logout User Controller: Handles user logout request
 const logoutUserCTRL = wrapController(async (req, res) => {
-
-    // user data is input 
     const user = req.user;
+    const tokenId = req.sessionId;
 
     // deletes all refresh tokens of user that is stored in database.
-    await JWTService.deleteRefreshByUserID(user.id);
+    await JWTService.deleteRefreshByUserID(user.id, tokenId);
 
     // sends response as success for user log out and clears cookie
+    const responseData = ApiResponse.success(200, 'User logged out!');
     res.status(200)
         .clearCookie('refresh-token')
-        .json(ApiResponse.success(200, 'User logged out!'));
+        .json(responseData);
 });
 
 // Generate Refresh Controller: Handles to regenerate to sustain user sessions
 const generateRefreshCTLR = wrapController(async (req, res) => {
 
-    // gets token from cookies else throws error
-    // let token = req.cookies['refresh-token'];
-    // if (!token)
-    //     throw new CustomError('Token missing!', 401);
+    // get refresh token from cookies else throws error
+    let prevRefreshToken = req.cookies['refresh-token'];
 
-    let { authorization } = req.headers;
-    const token = JWTService.checkTokenHeader(authorization);
+    // let { authorization } = req.headers;
+    // const token = JWTService.checkTokenHeader(authorization);
 
     // regenerates access and refresh token
-    const { accessToken, refreshToken } = await JWTService.regenRefreshAndAccess(token);
+    const { accessToken, refreshToken } = await JWTService.regenerateTokenPair(prevRefreshToken);
 
     // sends response a cookie with refresh token and a json response of access token
+    const responseData = ApiResponse.success(201, 'New Tokens Pair Generated!', { access_token: accessToken })
     res.status(200)
-        .cookie('refresh-token', refreshToken, { httpOnly: true, expiry: Date.now() + 3 * 24 * 60 * 60 * 1000, secure: true })
-        .json({
-            access_token: accessToken
-        });
+        .cookie('refresh-token', refreshToken, COOKIE_OPTIONS)
+        .json(responseData);
 
 });
 

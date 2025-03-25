@@ -1,6 +1,5 @@
 
 const pagination = (totalPosts, currentPage, limit) => {
-    console.log('pagination');
     let totalPages = Math.ceil(totalPosts / limit);
     let nextPage = currentPage + 1;
     let prevPage = currentPage - 1;

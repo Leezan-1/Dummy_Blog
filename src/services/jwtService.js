@@ -1,106 +1,130 @@
-require('dotenv').config();
+require("dotenv").config();
 
-const jwt = require('jsonwebtoken');
-const CustomError = require('../utils/CustomError');
+const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require("uuid");
+const CustomError = require("../utils/CustomError");
+const { Op } = require("sequelize");
+const { Tokens } = require("../models").sequelize.models
 
-const { RefreshTokens } = require('../models').sequelize.models
+const ACCESS_TOKEN_EXPIRY = "6h";
+const REFRESH_TOKEN_EXPIRY = "3d";
 
 class JWTService {
-
-    // checks token headers.
+    // checks and extracts token headers.
     static checkTokenHeader(authHeader) {
 
-        if (!authHeader || !authHeader.startsWith('Bearer '))
-            throw new CustomError('token missing', 400);
+        if (!authHeader || !authHeader.startsWith("Bearer "))
+            throw new CustomError("Token missing", 400);
 
-        return authHeader.split(' ').filter(Boolean)[1];
+        // extract token
+        return authHeader.split(" ").filter(Boolean)[1];
     }
 
-    // generates refresh token
-    static async genRefresh(userInfo) {
-        console.log('genRefresh()');
-        let expiryTimeStamp = Date.now() + 3 * 24 * 60 * 60 * 1000;
-        const token = jwt.sign(userInfo, process.env.REFRESHTOKEN, { expiresIn: '3d' });
+    static async generateNewTokenPair(userInfo) {
+        if (userInfo.sub)
+            // if sub is present then it came through prev token so userid may not be present
+            userInfo.id = userInfo.sub;
 
-        await RefreshTokens.create({
-            token: token,
-            expiry: expiryTimeStamp,
+        const jti = uuidv4();
+
+        const payload = {
+            sessionId: jti,
+            id: userInfo.id,
+            email: userInfo.email,
+        };
+
+        const newRefreshToken = jwt.sign(
+            payload,
+            process.env.REFRESH_TOKEN_SECRET,
+            { expiresIn: REFRESH_TOKEN_EXPIRY }
+        );
+
+        const newAccessToken = jwt.sign(
+            payload,
+            process.env.ACCESS_TOKEN_SECRET,
+            { expiresIn: ACCESS_TOKEN_EXPIRY }
+        );
+
+        let decoded = jwt.decode(newRefreshToken);
+
+        await Tokens.create({
+            jti: jti,
+            refresh_token: newRefreshToken,
+            access_token: newAccessToken,
+            refresh_tokens_expiry: decoded.exp * 1000,
             users_id: userInfo.id,
         });
 
-        return token;
-    }
-
-    static async genAccess(userInfo) {
-        console.log('this.genAccess()');
-        delete userInfo?.id;
-        const token = jwt.sign(userInfo, process.env.ACCESSTOKEN, { expiresIn: '6h' });
-        return token;
-    }
-
-    static async checkValidRefresh(refToken) {
-        try {
-            let decoded = jwt.verify(refToken, process.env.REFRESHTOKEN);
-
-            const dbToken = await RefreshTokens.findOne({
-                where: {
-                    token: refToken,
-                }
-            });
-
-            if (!dbToken)
-                throw new CustomError('Invaid Token', 403);
-
-            if (dbToken.expiry < Date.now()) {
-                await RefreshTokens.destroy({
-                    where: {
-                        token: refToken
-                    }
-                });
-                throw new CustomError('Refresh token expired', 403);
-            }
-
-            return decoded;
-
-        } catch (error) {
-            throw new CustomError(error, 403)
-        }
-
-    }
-
-    static async regenRefreshAndAccess(refToken) {
-        const decoded = await this.checkValidRefresh(refToken);
-
-        // Remove `exp` from the decoded token before re-signing
-        const { iat, exp, ...cleanUserInfo } = decoded;
-
-        await RefreshTokens.destroy({ where: { token: refToken } });
-
-        const newAccessToken = await this.genAccess(cleanUserInfo);
-        const newRefreshToken = await this.genRefresh(cleanUserInfo);
-
-        return { accessToken: newAccessToken, refreshToken: newRefreshToken };
-
+        return { refreshToken: newRefreshToken, accessToken: newAccessToken };
     }
 
     static async checkValidAccess(accToken) {
-
         try {
-            let decoded = jwt.verify(accToken, process.env.ACCESSTOKEN);
-            const { iat, exp, ...userInfo } = decoded;
-            return userInfo;
+
+            // checks token sent with Bearer.
+            let accessToken = this.checkTokenHeader(accToken);
+
+            // verifies the jwt token
+            let { iat, exp, ...payload } = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+            // remove unnecessary data.z
+
+            // check if token exists in database. Else error!
+            const tokensPair = await Tokens.findByPk(payload?.sessionId, { where: { access_token: accessToken, }, raw: true });
+            if (tokensPair)
+                return payload;
+
+            throw new CustomError("Invalid Access Token!", 401);
 
         } catch (error) {
-            throw new CustomError(error.message || "Invalid Token", 401);
+            throw new CustomError(error.message || "Invalid Access Token", 401);
         }
     }
 
-    static async deleteRefreshByUserID(user_id) {
-        const refTokens = await RefreshTokens.destroy({ where: { users_id: user_id } });
+    static async regenerateTokenPair(refToken) {
+        try {
+            // checks if valid refresh token!
+            // const refreshToken = this.checkTokenHeader(refToken);
+            if (!refToken)
+                throw new CustomError('Invalid Refresh Token', 401);
+
+            // verify the refresh token!
+            const { iat, exp, sessionId, ...payload } = jwt.verify(refToken, process.env.REFRESH_TOKEN_SECRET);
+
+            // check if refresh token exists in database.
+            const tokensPair = await Tokens.findByPk(sessionId, { where: { refresh_token: refToken } });
+
+            if (!tokensPair)
+                throw new CustomError('Invalid Refresh Token!');
+
+            // if exists then delete the tokens pair
+            tokensPair.destroy();
+
+            const newTokensPair = await this.generateNewTokenPair(payload)
+
+            return { accessToken: newTokensPair.accessToken, refreshToken: newTokensPair.refreshToken };
+
+        } catch (error) {
+            if (error === "TokenExpiredError") {
+                let decoded = jwt.decode(refToken);
+                await Tokens.destroy({ where: { jti: decoded?.sessionId } });
+
+                throw new CustomError('Refresh Token Expired!');
+            }
+            throw new CustomError(error.message, 401);
+        }
+    }
+
+    static async deleteRefreshByUserID(user_id, tokenId) {
+
+        const refTokens = await Tokens.destroy({
+            where: {
+                [Op.and]: [{ jti: tokenId, users_id: user_id }],
+            }
+        });
 
         // if refTokens != 1 then it is an error
         if (!refTokens)
-            throw new CustomError('refresh token couldnot be destroyed');
+            throw new CustomError("refresh token couldnot be destroyed");
     }
 }
 

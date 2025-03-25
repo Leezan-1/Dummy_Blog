@@ -1,5 +1,5 @@
+require('dotenv').config();
 const path = require("path");
-
 // creating an express application
 const express = require("express");
 const app = express();
@@ -18,7 +18,7 @@ const tagsRouter = require('./routes/tagsRoute');
 // MIDDLEWARES.
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.use(cookieparser());
+app.use(cookieparser(process.env.COOKIE_SECRET));
 
 // ROUTES using Routers
 // routes that handles user login and session authentication
