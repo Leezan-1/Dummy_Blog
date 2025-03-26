@@ -48,20 +48,19 @@ class PostInfo {
     }
 
     static toCollectionResponse(post) {
-
         return {
-            id: post.id,
-            uuid: post.uuid,
-            slug: post.slug,
-            title: post.title,
-            excerpt: post.excerpt,
-            author: `${post.author.first_name} ${post.author.last_name}`,
-            views: post.view_count,
+            id: post?.id,
+            uuid: post?.uuid,
+            slug: post?.slug,
+            title: post?.title,
+            excerpt: post?.excerpt,
+            author: `${post.author?.first_name} ${post.author?.last_name}`,
+            views: post?.view_count,
 
-            duration: toDuration(post.createdAt),
-            tags: post.tags.map((tag) => (tag.name)),
-            is_visible: post.visible,
-            is_featured: post.featured,
+            duration: toDuration(post?.createdAt),
+            tags: post.tags.map((tag) => (tag?.name)),
+            is_visible: post?.visible,
+            is_featured: post?.featured,
         };
     }
 

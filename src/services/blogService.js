@@ -1,8 +1,7 @@
 const fs = require('fs');
-const { Op } = require('sequelize');
-const { toJson, generateSlug, CustomError, pagination } = require('../utils');
+const { generateSlug, CustomError, pagination } = require('../utils');
 
-const { Posts, Posts_Images, Posts_Tags, Tags, Users } = require('../models').sequelize.models;
+const { Posts, Posts_Images, Tags, Users } = require('../models').sequelize.models;
 
 
 
@@ -28,6 +27,7 @@ class BlogService {
         // offset is calculated later because we have to send data to 
         let offset = Math.floor((paginationData.currentPage - 1) * limit);
 
+
         const allPosts = await Posts.findAll({
             attributes: ['id', 'uuid', 'title', 'slug', 'view_count', 'createdAt', 'visible', 'featured'],
             include: [
@@ -46,7 +46,6 @@ class BlogService {
             offset: offset,
             limit: limit,
             order: ['uuid'],
-
         });
 
         if (![allPosts])
@@ -57,24 +56,85 @@ class BlogService {
     }
 
     // get all posts by users_id.
-    static async getPostsByUser(uId) {
+    static async getAllPostsByUser(userId, page, limit) {
 
+        let totalPost = await Posts.count();
+        const paginationData = pagination(totalPost, page, limit);
+        // offset is calculated later because we have to send data to 
+        let offset = Math.floor((paginationData.currentPage - 1) * limit);
+
+        const posts = await Posts.findAll(
+            {
+                where: { users_id: userId },
+
+                // joins images and tags tables
+                include: [
+                    {
+                        model: Users,
+                        as: 'author',
+                        required: true,
+                        attributes: ['first_name', 'last_name'],
+                        right: true,
+                    },
+                    {
+                        model: Posts_Images,
+                        as: 'images',
+                    },
+                    {
+                        model: Tags,
+                        as: "tags",
+                        // required: true,
+                    }
+                ],
+                offset: offset,
+                order: ['uuid'],
+            }
+
+        );
+        return posts;
     }
 
     // get single post of a user using slug field of post
-    static async getSinglePost(postSlug) {
+    static async getSinglePostBySlug(postSlug) {
 
-        const post = await Posts.findOne({ where: { slug: postSlug } });
+        const post = await Posts.findOne(
+            {
+                where: { slug: postSlug },
+                // joins images and tags tables
+                include: [
+                    {
+                        model: Users,
+                        as: 'author',
+                        required: true,
+                        attributes: ['first_name', 'last_name'],
+                        right: true,
+                    },
+                    {
+                        model: Posts_Images,
+                        as: 'images',
+                    },
+                    {
+                        model: Tags,
+                        as: "tags",
+                        // required: true,
+                    }
+                ],
+                order: ['uuid'],
+            }
+        );
         if (!post)
             throw new CustomError('Post not found', 404);
-        return toJson(post);
+        return post;
     }
 
     // fetches post by its id.
-    static async getSinglePostByID(post_id) {
+    static async getSinglePostByID(postId) {
 
+        if (isNaN(postId)) {
+            throw new CustomError('Post Not Found', 404)
+        }
         // post_id searches for post
-        const post = await Posts.findByPk(post_id,
+        const post = await Posts.findByPk(postId,
             {
                 // joins images and tags tables
                 include: [
@@ -107,7 +167,7 @@ class BlogService {
     }
 
     // service that creates new blog post
-    static async createBlogPost(userInfo, formPostInfo, postImages) {
+    static async createBlogPost(userId, formPostInfo, postImages) {
 
         // generates slug
         formPostInfo.slug = await generateSlug(formPostInfo.title);
@@ -118,7 +178,7 @@ class BlogService {
             slug: formPostInfo.slug,
             excerpt: formPostInfo.excerpt,
             description: formPostInfo?.description,
-            users_id: userInfo?.id
+            users_id: userId
         });
 
         // adds tags to the post associated with tags.
@@ -135,12 +195,13 @@ class BlogService {
     }
 
     // service that deletes the post by its id.
-    static async deleteBlogPost(userInfo, postInfo) {
+    static async deleteBlogPost(userId, postInfo) {
 
-        if (userInfo.id != postInfo.users_id)
+        if (userId != postInfo.users_id)
             throw new CustomError('Invalid user trying to delete post', 401);
 
-        let deleted = await Posts.destroy({ where: { id: postInfo.id } });
+        let deleted = await postInfo.destroy();
+        // let deleted = await Posts.destroy({ where: { id: postInfo.id } });
         if (deleted)
             postInfo.images.map((image) => deleteImageFile(image.path));
         else
@@ -149,10 +210,10 @@ class BlogService {
         return (deleted) ? true : false;
     }
 
-    static async updateBlogPost(userInfo, postInfo, updatePostInfo, images) {
+    static async updateBlogPost(userId, postInfo, updatePostInfo, images) {
 
         // Error if user is not the author of the post.
-        if (userInfo.id != postInfo.users_id)
+        if (userId != postInfo.users_id)
             throw new CustomError('Invalid user trying to update post', 401);
 
         // check updated fields
@@ -163,11 +224,9 @@ class BlogService {
         };
 
         // update the fields of the post
-        const updated = await Posts.update(updatedFields, {
-            where: { id: postInfo.id }
-        });
+        const updated = await postInfo.update(updatedFields);
 
-        if (![updated]) {
+        if (!updated) {
             throw new CustomError('Could not update post', 400);
         }
 
@@ -190,8 +249,6 @@ class BlogService {
         }));
         // add file path to db 
         await Posts_Images.bulkCreate(imageFiles);
-
-
     }
 
     static async updateBlogViewCount(postInfoId) {

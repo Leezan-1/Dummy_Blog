@@ -22,12 +22,13 @@ app.use(cookieparser(process.env.COOKIE_SECRET));
 
 // ROUTES using Routers
 // routes that handles user login and session authentication
-app.use('/auth', authRouter);
+app.use('v1/api/auth', authRouter);
 
 // routes that handles blog post management
-app.use('/api/blogs', blogsRouter);
-app.use('/api/tags', tagsRouter);
+app.use('v1/api/blogs', blogsRouter);
+app.use('v1/api/tags', tagsRouter);
 
+app.use('v1/api/users', usersRouter);
 // Serving static files
 const publicDir = path.resolve(__dirname, 'public');
 app.use('/public', express.static(publicDir));

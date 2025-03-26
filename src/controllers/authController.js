@@ -23,8 +23,9 @@ const signUpCTLR = wrapController(async (req, res) => {
     await UserService.signUpUser(req.body);
 
     // sends 'User created' response.
-    res.status(201)
-        .json(ApiResponse.success(201));
+    const responseCode = 201;
+    const responseData = ApiResponse.success(responseCode);
+    res.status(responseCode).json(responseData);
 
 });
 
@@ -64,7 +65,7 @@ const logoutUserCTRL = wrapController(async (req, res) => {
 const generateRefreshCTLR = wrapController(async (req, res) => {
 
     // get refresh token from cookies else throws error
-    let prevRefreshToken = req.cookies['refresh-token'];
+    let prevRefreshToken = req.signedCookies['refresh-token'];
 
     // let { authorization } = req.headers;
     // const token = JWTService.checkTokenHeader(authorization);

@@ -14,6 +14,7 @@ const {
 //Router config that handles routing.
 const router = express.Router();
 
+// router.use(validatePostMW);
 router.route('/').get(getAllPostsCTLR);
 
 // router.route('/:post_slug').get(getSinglePostCTLR);
