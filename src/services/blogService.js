@@ -22,8 +22,8 @@ class BlogService {
 
         // pagination logic
 
-        let totalPost = await Posts.count();
-        const paginationData = pagination(totalPost, page, limit);
+        let totalPosts = await Posts.count();
+        const paginationData = pagination(totalPosts, page, limit);
         // offset is calculated later because we have to send data to 
         let offset = Math.floor((paginationData.currentPage - 1) * limit);
 
@@ -58,13 +58,18 @@ class BlogService {
     // get all posts by users_id.
     static async getAllPostsByUser(userId, page, limit) {
 
-        let totalPost = await Posts.count();
-        const paginationData = pagination(totalPost, page, limit);
+        let totalPosts = await Posts.count({ where: { users_id: userId } });
+
+
+        const paginationData = pagination(totalPosts, page, limit);
+
         // offset is calculated later because we have to send data to 
         let offset = Math.floor((paginationData.currentPage - 1) * limit);
 
         const posts = await Posts.findAll(
             {
+                attributes: ['id', 'uuid', 'title', 'slug', 'view_count', 'createdAt', 'visible', 'featured'],
+
                 where: { users_id: userId },
 
                 // joins images and tags tables
@@ -89,9 +94,9 @@ class BlogService {
                 offset: offset,
                 order: ['uuid'],
             }
-
         );
-        return posts;
+
+        return { posts, paginationData };
     }
 
     // get single post of a user using slug field of post

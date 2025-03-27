@@ -12,7 +12,6 @@ const REFRESH_TOKEN_EXPIRY = "3d";
 class JWTService {
     // checks and extracts token headers.
     static checkTokenHeader(authHeader) {
-
         if (!authHeader || !authHeader.startsWith("Bearer "))
             throw new CustomError("Token missing", 400);
 
@@ -28,9 +27,10 @@ class JWTService {
         const jti = uuidv4();
 
         const payload = {
-            sessionId: jti,
-            id: userInfo.id,
-            email: userInfo.email,
+            session_id: jti,
+            sub: userInfo.id,
+            username: userInfo?.username,
+            iss: "Blog Post",
         };
 
         const newRefreshToken = jwt.sign(
@@ -60,7 +60,6 @@ class JWTService {
 
     static async checkValidAccess(accToken) {
         try {
-
             // checks token sent with Bearer.
             let accessToken = this.checkTokenHeader(accToken);
 
@@ -69,7 +68,17 @@ class JWTService {
             // remove unnecessary data.z
 
             // check if token exists in database. Else error!
-            const tokensPair = await Tokens.findByPk(payload?.sessionId, { where: { access_token: accessToken, }, raw: true });
+            const tokensPair = await Tokens.findByPk(payload?.session_id,
+                {
+                    where: {
+                        [Op.and]: [{
+                            users_id: payload?.sub,
+                            access_token: accessToken,
+                        }]
+                    },
+                    raw: true
+                }
+            );
             if (tokensPair)
                 return payload;
 
@@ -88,10 +97,16 @@ class JWTService {
                 throw new CustomError('Invalid Refresh Token', 401);
 
             // verify the refresh token!
-            const { iat, exp, sessionId, ...payload } = jwt.verify(refToken, process.env.REFRESH_TOKEN_SECRET);
+            const { iat, exp, session_id, ...payload } = jwt.verify(refToken, process.env.REFRESH_TOKEN_SECRET);
 
             // check if refresh token exists in database.
-            const tokensPair = await Tokens.findByPk(sessionId, { where: { refresh_token: refToken } });
+            const tokensPair = await Tokens.findByPk(session_id,
+                {
+                    where: {
+                        [Op.and]: [{ users_id: payload?.sub, refresh_token: refToken }]
+                    },
+                    raw: true,
+                });
 
             if (!tokensPair)
                 throw new CustomError('Invalid Refresh Token!');
@@ -106,7 +121,7 @@ class JWTService {
         } catch (error) {
             if (error === "TokenExpiredError") {
                 let decoded = jwt.decode(refToken);
-                await Tokens.destroy({ where: { jti: decoded?.sessionId } });
+                await Tokens.destroy({ where: { jti: decoded?.session_id } });
 
                 throw new CustomError('Refresh Token Expired!');
             }

@@ -1,6 +1,3 @@
-const toJson = require("../utils/toJson")
-
-
 const toDuration = (createdAt) => {
     let postDuration;
     let millisecond = Date.now() - Date.parse(createdAt);
@@ -32,55 +29,49 @@ class PostInfo {
         // const post = toJson(post);
 
         return {
-            id: post.id,
-            uuid: post.uuid,
-            slug: post.slug,
-            title: post.title,
-            excerpt: post.excerpt,
-            content: post.description,
-            author: `${post.author.first_name} ${post.author.last_name}`,
-            duration: toDuration(post.createdAt),
-            images: post.images.map((img) => ({ img_name: img.img_name })),
-            tags: post.tags.map((tag) => (tag.name)),
-            is_visible: post.visible,
-            is_featured: post.featured,
-        }
-    }
-
-    static toCollectionResponse(post) {
-        return {
             id: post?.id,
             uuid: post?.uuid,
             slug: post?.slug,
             title: post?.title,
             excerpt: post?.excerpt,
-            author: `${post.author?.first_name} ${post.author?.last_name}`,
-            views: post?.view_count,
-
+            content: post?.description,
+            author: `${post?.author.first_name} ${post?.author.last_name}`,
             duration: toDuration(post?.createdAt),
-            tags: post.tags.map((tag) => (tag?.name)),
+            images: post?.images?.map((img) => ({ img_name: img.img_name })),
+            tags: post?.tags?.map((tag) => (tag.name)),
             is_visible: post?.visible,
             is_featured: post?.featured,
-        };
+        }
     }
 
-    static toMetadataResponse(metadata) {
+    static toCollectionResponse(posts, paginationData) {
         return {
+            metadata: {
+                total_posts: paginationData?.totalPosts,
+                total_pages: paginationData?.totalPages,
+                current_page: paginationData?.currentPage,
+                prev_page: paginationData?.prevPage,
+                next_page: paginationData?.nextPage
+            },
+            posts: posts?.map((post) => (
+                {
+                    id: post?.id,
+                    uuid: post?.uuid,
+                    slug: post?.slug,
+                    title: post?.title,
+                    excerpt: post?.excerpt,
+                    author: `${post?.author?.first_name} ${post?.author?.last_name}`,
+                    views: post?.view_count,
 
+                    duration: toDuration(post?.createdAt),
+                    tags: post?.tags?.map((tag) => (tag?.name)),
+                    is_visible: post?.visible,
+                    is_featured: post?.featured,
+                }
+            ))
         };
     }
 
-    // toPostObj() {
-    //     return {
-    //         id: this.id,
-    //         uuid: this.uuid,
-    //         title: this.title,
-    //         content: this.content,
-    //         duration: this.duration,
-    //         images: this.images,
-    //         tags: this.tags,
-    //     }
-    // }
 };
 
 module.exports = PostInfo;

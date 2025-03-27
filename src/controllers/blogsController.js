@@ -18,10 +18,8 @@ const getAllPostsCTLR = wrapController(async (req, res) => {
     // service that gets all posts and its info with images
     const { allPosts, paginationData } = await BlogService.getAllPosts(page, limit);
 
-    const toUserResponse = {
-        metadata: paginationData,
-        posts: allPosts.map((posts) => PostInfo.toCollectionResponse(posts)),
-    }
+    const toUserResponse = PostInfo.toCollectionResponse(allPosts, paginationData);
+
     // All post retrieved!
     return res.status(200).json(ApiResponse.success(200, 'All Blogs Data Fetched!', toUserResponse));
 

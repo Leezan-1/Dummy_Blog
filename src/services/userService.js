@@ -16,7 +16,9 @@ class UserService {
         // stores hashed password for user.
         let hashedPassword = await generatePassword(userInfo.password);
 
-        userInfo.username = userInfo.email.split('@')[0];
+        // auto generates username for new user
+        userInfo.username = '@' + userInfo.email.split('@')[0];
+        console.log('userInfo.username :>> ', userInfo.username);
         // creates a new user.
         await Users.create({
             first_name: userInfo.fname,
@@ -43,6 +45,11 @@ class UserService {
 
         return cleanUserData;
 
+    }
+
+    static async getUserById(userId) {
+        const user = await Users.findByPk(userId, { raw: true });
+        return user;
     }
 
     // gets user's information by email.

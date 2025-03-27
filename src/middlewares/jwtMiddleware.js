@@ -10,13 +10,22 @@ const authTokenMW = wrapMiddleware(async (req, res, next) => {
     // check valid access token
     let userInfo = await JWTService.checkValidAccess(authorization);
 
-    let user = await UserService.getUserByEmail(userInfo.email);
+    // let user = await UserService.getUserById(userInfo.sub);
 
-    if (!user) {
-        throw new CustomError('User not valid', 403);
-    }
-    req.user = user;
-    req.sessionId = userInfo.sessionId;
+    // if (!user) {
+    //     throw new CustomError('Invalid Access Token', 401);
+    // }
+    req.user = {
+        id: userInfo.sub,
+        username: userInfo.username
+    };
+    req.sessionId = userInfo.session_id;
+
+    // if (req.params?.username) {
+    //     if (user.username != req.params?.username) {
+    //         throw new CustomError('Unauthorized User Accessing Route!', 401)
+    //     }
+    // }
 
     next();
 });

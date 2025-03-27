@@ -22,15 +22,15 @@ const validateSignUpMW = wrapMiddleware(async (req, res, next) => {
 
 // middleware that validates the user login form.
 const validateLoginMW = wrapMiddleware(async (req, res, next) => {
-    console.log('loginValidationMW()');
 
     let { email, password } = req.body;
 
-    if (!(validateEmail(email)) || !(validatePswd(password))) {
-        throw new CustomError('Invalid form data', 401)
-    }
+    if (validateEmail(email) || validatePswd(password))
+        next()
+    else
+        throw new CustomError('Invalid form data', 401);
 
-    next();
+
 });
 
 // middleware that validates the blog-post form.
