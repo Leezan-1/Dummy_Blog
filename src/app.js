@@ -42,12 +42,11 @@ app.use(async (req, res) => {
         message: "Not Found",
         error: {
             reason: "Route not found!",
-            message: "Page you are trying to access does not exist!"
+            message: "Route you are trying to access does not exist! Try different request method!"
         }
     }
     res.status(404).json(toResponse);
 });
-
 
 // ERROR MIDDLEWARE
 app.use(errorHandlerMW);

@@ -1,6 +1,4 @@
-const JWTService = require("../services/jwtService");
-const UserService = require("../services/userService");
-const CustomError = require("../utils/CustomError");
+const JWTService = require("../services/JWTService");
 const { wrapMiddleware } = require("../utils/asyncwrappers");
 
 const authTokenMW = wrapMiddleware(async (req, res, next) => {
@@ -10,7 +8,7 @@ const authTokenMW = wrapMiddleware(async (req, res, next) => {
     // check valid access token
     let userInfo = await JWTService.checkValidAccess(authorization);
 
-    // let user = await UserService.getUserById(userInfo.sub);
+    // let user = await AuthService.getUserById(userInfo.sub);
 
     // if (!user) {
     //     throw new CustomError('Invalid Access Token', 401);

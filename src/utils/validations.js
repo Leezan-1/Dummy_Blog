@@ -4,27 +4,24 @@ const CustomError = require("./CustomError");
 function validateName(name) {
     const nameRegex = /^[A-Za-z]{2,50}$/; // Allows only letters, between 2 to 50 characters
     if (nameRegex.test(name))
-        return true;
-    else
-        throw new CustomError('Please Enter Valid Email!', 400);
+        return name;
+    throw new CustomError('Please Enter Valid Name!', 400);
 }
 
 // validates user's email
 function validateEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Standard email format validation
     if (emailRegex.test(email))
-        return true;
-    else
-        throw new CustomError('Please Enter Valid Email!', 400);
+        return email;
+    throw new CustomError('Please Enter Valid Email!', 400);
 }
 
 // validates user's password
 function validatePswd(pswd) {
     const passwordRegex = /^.{8,20}$/; // Ensures password length is between 8 to 20 characters
     if (passwordRegex.test(pswd))
-        return true;
-    else
-        throw new CustomError('Please Enter Valid Password!', 400);
+        return pswd;
+    throw new CustomError('Please Enter Valid Password!', 400);
 }
 
 // validates title of blog post
@@ -34,7 +31,7 @@ function validatePostTitle(title) {
     // title should be 10-100 characters long
     // allowed characters : letters, numbers, spaces,  . , ! ? ' " -
     if (title && titleRegex.test(title))
-        return true;
+        return title;
     throw new CustomError('Invalid Post Title: Title must be 10 - 100 character long.', 406);
 
 }
@@ -45,7 +42,7 @@ function validatePostExcerpt(excerpt) {
 
     const excerptRegex = /^(?=.{30,150}$)[\s\S]+$/;
     if (excerpt && excerptRegex.test(excerpt)) {
-        return true;
+        return excerpt;
     }
     throw new CustomError('Invalid Post Excerpt: Excerpt must be 30 to 150 character long.', 406);
 }
@@ -53,8 +50,7 @@ function validatePostExcerpt(excerpt) {
 function validateTagName(tagName) {
     const tagNameRegex = /^[A-Za-z]{1,15}$/;
     if (tagName && tagNameRegex.test(tagName))
-        return true;
-
+        return tagName;
     throw new CustomError('Invalid Tag Name: Tag name must be aphabet and only 15 character long.', 400);
 }
 

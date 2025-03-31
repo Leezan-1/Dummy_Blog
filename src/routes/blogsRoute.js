@@ -20,13 +20,13 @@ router.route('/').get(getAllPostsCTLR);
 // router.route('/:post_slug').get(getSinglePostCTLR);
 // router.route('/uploads').post(uploadBlogImagesMW, uploadImageCTLR);
 
-router.route('/new-post').post(authTokenMW, uploadBlogImagesMW, validatePostMW, createNewPostCTLR)
+router.route('/new-post').post(authTokenMW, uploadBlogImagesMW, createNewPostCTLR)
 
 router.route('/:post_id')
     .get(getSinglePostCTLR)
     // .all(authTokenMW)
     //VALIDATE:add validation controller that validates post_id to be integer
     .delete(authTokenMW, deletePostCTLR)
-    .patch(authTokenMW, uploadBlogImagesMW, validatePostMW, updatePostCTLR);
+    .patch(authTokenMW, uploadBlogImagesMW, updatePostCTLR);
 
 module.exports = router;

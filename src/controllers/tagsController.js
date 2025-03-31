@@ -1,33 +1,28 @@
-const TagService = require("../services/tagService");
+const TagService = require("../services/TagService");
 const TagInfo = require('../resources/tagsInfo');
 const ApiResponse = require("../utils/apiMessage");
 const { wrapController } = require("../utils/asyncwrappers");
-const { validateTagName } = require("../utils/validations");
 
 const getAllTagsCTLR = wrapController(async (req, res) => {
     const tags = await TagService.getAllTags();
 
-    const toResponse = tags.map((tag) => TagInfo.toClient(tag));
+    const toResponse = TagInfo.sendAllTags(tags);
     res.status(200).json(ApiResponse.success(200, null, toResponse));
 
 });
 
 const createNewTagCTLR = wrapController(async (req, res) => {
-    const tagName = req.body['tag-name'];
+    const tagName = req.body['tag-name'].toLowerCase();
 
     // service that creates new tag.
-    validateTagName(tagName);
     await TagService.createNewTag(tagName);
 
     res.status(201).json(ApiResponse.success(201, "Tag created succesfully"));
 });
 
 const updateTagCTLR = wrapController(async (req, res) => {
-    const prevTagName = req.params['tag'];
-    const newTagName = req.body['tag-name'];
-
-    validateTagName(prevTagName);
-    validateTagName(newTagName);
+    const prevTagName = req.params['tag'].toLowerCase();
+    const newTagName = req.body['tag-name'].toLowerCase();
 
     await TagService.updateTag(prevTagName, newTagName);
 
@@ -36,7 +31,7 @@ const updateTagCTLR = wrapController(async (req, res) => {
 
 const deleteTagCTLR = wrapController(async (req, res) => {
     const tagName = req.params['tag'];
-    validateTagName(tagName);
+    // validateTagName(tagName);
 
     await TagService.deleteTag(tagName);
 

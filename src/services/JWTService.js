@@ -105,7 +105,6 @@ class JWTService {
                     where: {
                         [Op.and]: [{ users_id: payload?.sub, refresh_token: refToken }]
                     },
-                    raw: true,
                 });
 
             if (!tokensPair)
@@ -119,11 +118,11 @@ class JWTService {
             return { accessToken: newTokensPair.accessToken, refreshToken: newTokensPair.refreshToken };
 
         } catch (error) {
-            if (error === "TokenExpiredError") {
+            if (error instanceof jwt.TokenExpiredError) {
                 let decoded = jwt.decode(refToken);
                 await Tokens.destroy({ where: { jti: decoded?.session_id } });
 
-                throw new CustomError('Refresh Token Expired!');
+                throw new CustomError('Refresh Token Expired!', 401);
             }
             throw new CustomError(error.message, 401);
         }

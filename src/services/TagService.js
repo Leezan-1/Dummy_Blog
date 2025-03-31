@@ -1,5 +1,5 @@
 const CustomError = require('../utils/CustomError');
-const toJson = require('../utils/toJson');
+const { validateTagName } = require('../utils/validations');
 
 const { Tags } = require('../models').sequelize.models;
 
@@ -7,28 +7,33 @@ class TagService {
     static async getAllTags() {
 
         const allTags = await Tags.findAll();
-        return toJson(allTags);
+        return allTags;
     }
 
     static async getTagName(tagName) {
         const fectchedTag = await Tags.findOne({ where: { name: tagName } });
-        return (fectchedTag) ? toJson(fectchedTag) : false;
+        return fectchedTag;
     }
 
     static async createNewTag(tagName) {
 
+        validateTagName(tagName);
+
         // checks if there is any tag with the name 
-        // if (await this.getTagName(tagName))
-        // throw new CustomError('Tag name already exist', 400);
+        if (await this.getTagName(tagName))
+            throw new CustomError('Tag name already exist', 400);
 
         // else creates tag
-        let created = await Tags.findOrCreate({ where: { name: tagName, } });
+        let created = await Tags.create({ name: tagName });
 
         if (!created)
             throw new CustomError('Tag could not be created!', 400);
     }
 
     static async updateTag(prevTagName, newTagName) {
+
+        validateTagName(prevTagName);
+        validateTagName(newTagName);
 
         if (!(await this.getTagName(prevTagName)))
             throw new CustomError('Tag does not exist!', 404);
@@ -51,7 +56,7 @@ class TagService {
         if (!(await this.getTagName(tagName)))
             throw new CustomError('Tag doesnot exist', 404);
 
-        const deleted = await Tags.destroy({ where: { name: tagName } });
+        await Tags.destroy({ where: { name: tagName } });
 
     }
 

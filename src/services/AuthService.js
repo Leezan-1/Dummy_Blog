@@ -2,29 +2,35 @@
 const { Users } = require("../models").sequelize.models
 const { checkUserPassword, generatePassword } = require("../utils/password");
 const CustomError = require("../utils/CustomError");
+const { validateEmail, validateName, validatePswd } = require("../utils/validations");
 
-class UserService {
+class AuthService {
 
     // creates a new user
-    static async signUpUser(userInfo) {
+    static async signUpUser(newUserFormInfo) {
+        let { fname, lname, email, password } = newUserFormInfo;
 
+        validateEmail(email);
+        validateName(fname);
+        validateName(lname);
+        validatePswd(password);
         // checks if there is any other user with same email address.
-        let userExists = await this.getUserByEmail(userInfo.email);
+        let userExists = await this.getUserByEmail(email);
         if (userExists)
             throw new CustomError('User Already Exists', 409);
 
         // stores hashed password for user.
-        let hashedPassword = await generatePassword(userInfo.password);
+        let hashedPassword = await generatePassword(password);
 
         // auto generates username for new user
-        userInfo.username = '@' + userInfo.email.split('@')[0];
-        console.log('userInfo.username :>> ', userInfo.username);
+        let username = email.split('@')[0];
+
         // creates a new user.
         await Users.create({
-            first_name: userInfo.fname,
-            last_name: userInfo.lname,
-            username: userInfo.username,
-            email: userInfo.email,
+            first_name: fname,
+            last_name: lname,
+            username: username,
+            email: email,
             password: hashedPassword
         });
     }
@@ -32,19 +38,23 @@ class UserService {
     // authenticate user with credentials and gets user's info.
     static async loginUser(userInfo) {
 
+        // user service handles validate user login info to authenticate
+        let { email, password } = userInfo;
+        validateEmail(email);
+        validatePswd(password);
+
         // find users with email address.
-        let user = await this.getUserByEmail(userInfo.email);
-        if (!user)
+        let dbUser = await this.getUserByEmail(userInfo.email);
+        if (!dbUser)
             throw new CustomError('Email or Password did not match', 401);
 
         // check password is valid, if false send error
-        if (!(await checkUserPassword(userInfo.password, user.password)))
+        if (!(await checkUserPassword(password, dbUser.password)))
             throw new CustomError('Email or password did not match', 401);
 
-        const { password, createdAt, ...cleanUserData } = user;
+        // const { password, createdAt, ...cleanUserData } = user;
 
-        return cleanUserData;
-
+        return dbUser;
     }
 
     static async getUserById(userId) {
@@ -61,4 +71,4 @@ class UserService {
     }
 }
 
-module.exports = UserService;
+module.exports = AuthService;

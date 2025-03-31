@@ -4,8 +4,8 @@
     error if any error is thrown.
 */
 const { wrapController } = require("../utils/asyncwrappers");
-const UserService = require('../services/userService');
-const JWTService = require("../services/jwtService");
+const AuthService = require('../services/AuthService');
+const JWTService = require("../services/JWTService");
 const ApiResponse = require("../utils/apiMessage");
 
 const COOKIE_OPTIONS = {
@@ -19,12 +19,12 @@ const COOKIE_OPTIONS = {
 const signUpCTLR = wrapController(async (req, res) => {
 
     // creates new user using validated data through user body.
-
-    await UserService.signUpUser(req.body);
+    await AuthService.signUpUser(req.body);
 
     // sends 'User created' response.
     const responseCode = 201;
-    const responseData = ApiResponse.success(responseCode);
+    const responseData = ApiResponse.success(responseCode, 'New User Created!');
+
     res.status(responseCode).json(responseData);
 
 });
@@ -32,15 +32,16 @@ const signUpCTLR = wrapController(async (req, res) => {
 // Login User Controller: Handles user login request
 const loginUserCTLR = wrapController(async (req, res) => {
 
-    // user service handles validate user login info to authenticate
-    const user = await UserService.loginUser(req.body);
+
+    const user = await AuthService.loginUser(req.body);
 
     // after user authentication refresh token is generated 
     const { refreshToken, accessToken } = await JWTService.generateNewTokenPair(user);
 
     // response sends a cookie of refresh-token and a json object about user info along with access token.
-    const responseData = ApiResponse.success(200, 'User Logged In', { access_token: accessToken })
-    res.status(200)
+    let responseCode = 200
+    const responseData = ApiResponse.success(responseCode, 'User Logged In', { access_token: accessToken })
+    res.status(responseCode)
         .cookie('refresh-token', refreshToken, COOKIE_OPTIONS)
         .json(responseData);
 

@@ -1,12 +1,18 @@
 const fs = require('fs');
 const { generateSlug, CustomError, pagination } = require('../utils');
+const { validatePostTitle, validatePostExcerpt } = require('../utils/validations');
 
 const { Posts, Posts_Images, Tags, Users } = require('../models').sequelize.models;
 
 
 
-async function checkTags(tagArray) {
-    const tagInstance = await Promise.all(tagArray.map((tagName) => Tags.findOrCreate({ where: { name: tagName.trim() } })));
+async function checkTags(tags) {
+    let tagsArray = tags
+    if (!Array.isArray(tags)) {
+        tagsArray = Array.prototype.concat(tags);
+    }
+    console.log('tagsArray :>> ', tagsArray);
+    const tagInstance = await Promise.all(tagsArray.map((tagName) => Tags.findOrCreate({ where: { name: tagName.trim() } })));
     return tagInstance.map(([item]) => item);
 }
 
@@ -29,13 +35,13 @@ class BlogService {
 
 
         const allPosts = await Posts.findAll({
-            attributes: ['id', 'uuid', 'title', 'slug', 'view_count', 'createdAt', 'visible', 'featured'],
+            // attributes: ['id', 'uuid', 'title', 'slug', 'view_count', 'createdAt', 'visible', 'featured'],
             include: [
                 {
                     model: Users,
                     as: 'author',
                     required: true,
-                    attributes: ['first_name', 'last_name'],
+                    attributes: ['first_name', 'last_name', 'username'],
                     right: true,
                 },
                 {
@@ -59,16 +65,13 @@ class BlogService {
     static async getAllPostsByUser(userId, page, limit) {
 
         let totalPosts = await Posts.count({ where: { users_id: userId } });
-
-
         const paginationData = pagination(totalPosts, page, limit);
-
         // offset is calculated later because we have to send data to 
         let offset = Math.floor((paginationData.currentPage - 1) * limit);
 
         const posts = await Posts.findAll(
             {
-                attributes: ['id', 'uuid', 'title', 'slug', 'view_count', 'createdAt', 'visible', 'featured'],
+                // attributes: ['id', 'uuid', 'title', 'slug', 'view_count', 'createdAt', 'visible', 'featured'],
 
                 where: { users_id: userId },
 
@@ -78,7 +81,7 @@ class BlogService {
                         model: Users,
                         as: 'author',
                         required: true,
-                        attributes: ['first_name', 'last_name'],
+                        attributes: ['first_name', 'last_name', 'username'],
                         right: true,
                     },
                     {
@@ -111,7 +114,7 @@ class BlogService {
                         model: Users,
                         as: 'author',
                         required: true,
-                        attributes: ['first_name', 'last_name'],
+                        attributes: ['first_name', 'last_name', 'username'],
                         right: true,
                     },
                     {
@@ -173,21 +176,33 @@ class BlogService {
 
     // service that creates new blog post
     static async createBlogPost(userId, formPostInfo, postImages) {
+        const { title, excerpt, tags, description } = formPostInfo;
 
-        // generates slug
-        formPostInfo.slug = await generateSlug(formPostInfo.title);
-        const toAddTags = await checkTags(formPostInfo?.tags);
+        // validates post form body
 
+        validatePostTitle(title);
+        validatePostExcerpt(excerpt);
+        // VALIDATE tags and description.
+        // convert tags into array while validating
+
+        // generates slug for the post
+        let postSlug = await generateSlug(title);
+
+        // creates the post first.
         const post = await Posts.create({
-            title: formPostInfo.title,
-            slug: formPostInfo.slug,
-            excerpt: formPostInfo.excerpt,
-            description: formPostInfo?.description,
+            title: title,
+            slug: postSlug,
+            excerpt: excerpt,
+            description: description,
             users_id: userId
         });
 
-        // adds tags to the post associated with tags.
-        await post.addTags(toAddTags);
+        // adds tags for the post if tags is sent with it
+        if (tags) {
+            const toAddTags = await checkTags(tags);
+            // adds tags to the post associated with tags.
+            await post.addTags(toAddTags);
+        }
 
         // add images to post_images table
         let imageFiles = postImages.map((image) => ({
@@ -210,22 +225,28 @@ class BlogService {
         if (deleted)
             postInfo.images.map((image) => deleteImageFile(image.path));
         else
-            throw new CustomError('Couldn\'t delete post', 400);
+            throw new CustomError('Could not delete post', 400);
 
         return (deleted) ? true : false;
     }
 
     static async updateBlogPost(userId, postInfo, updatePostInfo, images) {
-
         // Error if user is not the author of the post.
         if (userId != postInfo.users_id)
             throw new CustomError('Invalid user trying to update post', 401);
 
+        const { title, excerpt, tags, description } = updatePostInfo;
+
+        validatePostTitle(title);
+        validatePostExcerpt(excerpt);
+        // VALIDATE tags
+
+
         // check updated fields
         const updatedFields = {
-            title: updatePostInfo.title,
-            excerpt: updatePostInfo.excerpt,
-            description: updatePostInfo.description,
+            title: title,
+            excerpt: excerpt,
+            description: description,
         };
 
         // update the fields of the post
@@ -236,8 +257,8 @@ class BlogService {
         }
 
         // update tags are given then add tags too.
-        if (updatePostInfo.tags) {
-            const toAddTags = await checkTags(updatePostInfo.tags);
+        if (tags) {
+            const toAddTags = await checkTags(tags);
             await postInfo.setTags(toAddTags);
         }
 

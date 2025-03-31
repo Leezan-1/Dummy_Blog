@@ -4,8 +4,9 @@ Every Controller is wrapped with wrapController()  that handles
 error if any error is thrown.
 */
 const PostInfo = require("../resources/postInfo");
-const BlogService = require("../services/blogService");
+const BlogService = require("../services/BlogService");
 const { ApiResponse, wrapController } = require('../utils');
+const { validatePostTitle, validatePostExcerpt } = require("../utils/validations");
 
 // controller to get all the blogs from the database
 const getAllPostsCTLR = wrapController(async (req, res) => {
@@ -63,6 +64,7 @@ const updatePostCTLR = wrapController(async (req, res) => {
 
     // user info from access token
     const userId = req.user.id;
+
 
     // post's id is retrieved from params
     const postId = Number(req.params?.post_id);
