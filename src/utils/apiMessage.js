@@ -11,13 +11,14 @@ class ApiResponse {
         }
     }
 
-    static failure(statusCode, msg, error = null) {
+    static failure(statusCode, msg = null, error = null) {
         return {
             code: statusCode,
             success: false,
             message: getMessage(statusCode),
             error: {
-                reason: error.msg
+                reason: msg || error.msg,
+                error_object: error
             }
         }
     }

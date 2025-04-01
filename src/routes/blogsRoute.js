@@ -1,6 +1,5 @@
 const express = require('express');
 const { authTokenMW } = require('../middlewares/jwtMiddleware');
-const { validatePostMW } = require('../middlewares/validationMiddleware');
 const { uploadBlogImagesMW } = require('../middlewares/multerMiddleware')
 const {
     getAllPostsCTLR,

@@ -49,16 +49,6 @@ module.exports = (sequelize, DataTypes) => {
       unique: true,
       allowNull: false,
     },
-    featured: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-    visible: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: true,
-    },
     excerpt: {
       type: DataTypes.TEXT('tiny'),
       allowNull: false,
@@ -70,6 +60,26 @@ module.exports = (sequelize, DataTypes) => {
     view_count: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
+    },
+    thumbnail: {
+      type: DataTypes.STRING,
+      defaultValue: null,
+      allowNull: true,
+    },
+    thumbnail_path: {
+      type: DataTypes.STRING,
+      defaultValue: null,
+      allowNull: true,
+    },
+    featured: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    visible: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
     },
     users_id: {
       type: DataTypes.INTEGER,

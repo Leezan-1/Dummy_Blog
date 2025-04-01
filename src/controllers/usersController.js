@@ -1,5 +1,4 @@
 const PostInfo = require("../resources/postInfo");
-const { toCollectionResponse } = require("../resources/postInfo");
 const BlogService = require("../services/BlogService");
 const { wrapController, CustomError, ApiResponse } = require("../utils");
 
@@ -15,14 +14,14 @@ const getUserPosts = wrapController(async (req, res) => {
     const limit = Number(req.query?.limit) || 10;
 
     // username should start with @ and 
-    if (!username.startsWith('@') || user.username !== username.split('@')[1])
-        throw new CustomError('Unauthorized user accessing ', 401);
+    if (!username.startsWith("@") || user.username !== username.split("@")[1])
+        throw new CustomError("Unauthorized user accessing the route", 401);
 
-    const { posts, paginationData } = await BlogService.getAllPostsByUser(user.id, page, limit);
+    const { posts, paginationData } = await BlogService.getAllPostsByUser(user.id, username, page, limit);
 
     // response
     const responseData = PostInfo.toCollectionResponse(posts, paginationData);
-    let responseJson = ApiResponse.success(200, 'User\'s posts fetched!', responseData);
+    let responseJson = ApiResponse.success(200, "User's posts fetched!", responseData);
     res.status(200).json(responseJson);
 
 });

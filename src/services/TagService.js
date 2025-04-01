@@ -1,7 +1,7 @@
 const CustomError = require('../utils/CustomError');
 const { validateTagName } = require('../utils/validations');
 
-const { Tags } = require('../models').sequelize.models;
+const { Tags } = require('../models');
 
 class TagService {
     static async getAllTags() {

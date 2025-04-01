@@ -1,3 +1,5 @@
+const imageUrlGenerator = require("../utils/imageUrlGenerator");
+
 const toDuration = (createdAt) => {
     let postDuration;
     let millisecond = Date.now() - Date.parse(createdAt);
@@ -34,10 +36,16 @@ class PostInfo {
             slug: post?.slug,
             title: post?.title,
             excerpt: post?.excerpt,
+            thumbnail_image: post?.thumbnail,
+            thumbnail_url: imageUrlGenerator(post?.thumbnail_path),
             content: post?.description,
             author: `${post?.author.first_name} ${post?.author.last_name}`,
+            username: `@${post?.author.username}`,
             duration: toDuration(post?.createdAt),
-            images: post?.images?.map((img) => ({ img_name: img.img_name })),
+            images: post?.images?.map((img) => ({
+                image_name: img.img_name,
+                image_url: imageUrlGenerator(img?.path)
+            })),
             tags: post?.tags?.map((tag) => (tag.name)),
             is_visible: post?.visible,
             is_featured: post?.featured,
@@ -53,22 +61,31 @@ class PostInfo {
                 prev_page: paginationData?.prevPage,
                 next_page: paginationData?.nextPage
             },
-            posts: posts?.map((post) => (
-                {
-                    id: post?.id,
-                    uuid: post?.uuid,
-                    slug: post?.slug,
-                    title: post?.title,
-                    excerpt: post?.excerpt,
-                    author: `${post?.author?.first_name} ${post?.author?.last_name}`,
-                    views: post?.view_count,
+            posts: posts?.map((post) => {
+                const response = this.toResponse(post);
+                delete (response?.tags);
+                delete (response?.content);
+                delete (response?.images);
+                // {
 
-                    duration: toDuration(post?.createdAt),
-                    tags: post?.tags?.map((tag) => (tag?.name)),
-                    is_visible: post?.visible,
-                    is_featured: post?.featured,
-                }
-            ))
+                //     id: post?.id,
+                //     uuid: post?.uuid,
+                //     slug: post?.slug,
+                //     title: post?.title,
+                //     excerpt: post?.excerpt,
+                //     // thumbnail_image: post?.thumbnail,
+                //     // thumbnail_url: image_url_generator(post?.thumbnail_path),
+                //     author: `${post?.author?.first_name} ${post?.author?.last_name}`,
+                //     views: post?.view_count,
+
+                //     duration: toDuration(post?.createdAt),
+                //     tags: post?.tags?.map((tag) => (tag?.name)),
+                //     is_visible: post?.visible,
+                //     is_featured: post?.featured,
+                // }
+                return response;
+            }
+            )
         };
     }
 

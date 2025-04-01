@@ -4,7 +4,7 @@ const wrapController = function (controllerFunction) {
         try {
             return await controllerFunction(req, res);
         } catch (error) {
-            console.log('Controller Error:', error);
+            console.log('Controller Error!\n');
             next(error);
         }
     };
@@ -16,7 +16,7 @@ const wrapMiddleware = function (middlewareFunction) {
             return await middlewareFunction(req, res, next)
 
         } catch (error) {
-            console.log('Middleware Error', error);
+            console.log('Middleware Error!\n');
             next(error);
         }
     };

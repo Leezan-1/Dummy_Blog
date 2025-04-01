@@ -4,8 +4,8 @@ const router = express.Router();
 const { authTokenMW } = require('../middlewares/jwtMiddleware');
 const { getUserPosts } = require('../controllers/usersController');
 
-router.use(authTokenMW);
+// router.use(authTokenMW);
 
-router.route("/:username/blogs").get(getUserPosts);
+router.route("/:username/blogs").get(authTokenMW, getUserPosts);
 
 module.exports = router;

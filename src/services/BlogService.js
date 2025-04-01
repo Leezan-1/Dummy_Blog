@@ -2,17 +2,14 @@ const fs = require('fs');
 const { generateSlug, CustomError, pagination } = require('../utils');
 const { validatePostTitle, validatePostExcerpt } = require('../utils/validations');
 
-const { Posts, Posts_Images, Tags, Users } = require('../models').sequelize.models;
-
-
+const { Posts, Posts_Images, Tags, Users } = require('../models');
 
 async function checkTags(tags) {
     let tagsArray = tags
     if (!Array.isArray(tags)) {
         tagsArray = Array.prototype.concat(tags);
     }
-    console.log('tagsArray :>> ', tagsArray);
-    const tagInstance = await Promise.all(tagsArray.map((tagName) => Tags.findOrCreate({ where: { name: tagName.trim() } })));
+    const tagInstance = await Promise.all(tagsArray.map((tagName) => Tags.findOrCreate({ where: { name: tagName?.toLowerCase()?.trim() } })));
     return tagInstance.map(([item]) => item);
 }
 
@@ -61,8 +58,8 @@ class BlogService {
         return { allPosts, paginationData };
     }
 
-    // get all posts by users_id.
-    static async getAllPostsByUser(userId, page, limit) {
+    // get all posts by users_id and username
+    static async getAllPostsByUser(userId, username, page, limit) {
 
         let totalPosts = await Posts.count({ where: { users_id: userId } });
         const paginationData = pagination(totalPosts, page, limit);
@@ -98,6 +95,9 @@ class BlogService {
                 order: ['uuid'],
             }
         );
+
+        if (username.split('@')[1] !== posts?.[0].author.username)
+            throw new CustomError("User fd not Found!", 404);
 
         return { posts, paginationData };
     }
@@ -150,7 +150,7 @@ class BlogService {
                         model: Users,
                         as: 'author',
                         required: true,
-                        attributes: ['first_name', 'last_name'],
+                        attributes: ['first_name', 'last_name', 'username'],
                         right: true,
                     },
                     {
@@ -163,7 +163,7 @@ class BlogService {
                         // required: true,
                     }
                 ],
-                order: ['uuid'],
+                order: ['createdAt', 'uuid'],
             }
         );
 
@@ -188,12 +188,21 @@ class BlogService {
         // generates slug for the post
         let postSlug = await generateSlug(title);
 
+        let thumbnail_img = postImages['thumbnail-image']?.[0];
+        let blog_images = postImages['blog-images'];
+
+        if (!thumbnail_img) {
+            thumbnail_img = blog_images?.[0];
+        }
+
         // creates the post first.
         const post = await Posts.create({
             title: title,
             slug: postSlug,
             excerpt: excerpt,
             description: description,
+            thumbnail: thumbnail_img?.filename,
+            thumbnail_path: thumbnail_img?.path,
             users_id: userId
         });
 
@@ -204,13 +213,15 @@ class BlogService {
             await post.addTags(toAddTags);
         }
 
-        // add images to post_images table
-        let imageFiles = postImages.map((image) => ({
-            posts_id: post.id,
-            img_name: image.filename,
-            path: image.path
-        }));
-        await Posts_Images.bulkCreate(imageFiles);
+        if (blog_images) {
+            // add images to post_images table
+            let imageFiles = blog_images?.map((image) => ({
+                posts_id: post.id,
+                img_name: image.filename,
+                path: image.path
+            }));
+            await Posts_Images.bulkCreate(imageFiles);
+        }
 
     }
 
@@ -231,50 +242,74 @@ class BlogService {
     }
 
     static async updateBlogPost(userId, postInfo, updatePostInfo, images) {
+
         // Error if user is not the author of the post.
         if (userId != postInfo.users_id)
             throw new CustomError('Invalid user trying to update post', 401);
 
+        // validate form data
         const { title, excerpt, tags, description } = updatePostInfo;
-
         validatePostTitle(title);
         validatePostExcerpt(excerpt);
-        // VALIDATE tags
+        // VALIDATE tags and description
+        // tags should be lowercase and be in array
 
+        // If thumbnail is not given, then first image of blog_image is the thumbnail!
+        let thumbnail_img = images['thumbnail-image']?.[0];
+        let blog_images = images['blog-images'];
 
-        // check updated fields
-        const updatedFields = {
+        if (!thumbnail_img) {
+            thumbnail_img = blog_images?.[0];
+        }
+
+        // update the fields of the post along with thumbnail
+        let previousThumbnailPath = postInfo.thumbnail_path;
+        const updated = await postInfo.update({
             title: title,
             excerpt: excerpt,
             description: description,
-        };
-
-        // update the fields of the post
-        const updated = await postInfo.update(updatedFields);
-
+            thumbnail: thumbnail_img?.filename,
+            thumbnail_path: thumbnail_img?.path
+        });
         if (!updated) {
             throw new CustomError('Could not update post', 400);
         }
 
-        // update tags are given then add tags too.
-        if (tags) {
-            const toAddTags = await checkTags(tags);
-            await postInfo.setTags(toAddTags);
+        // remove previous image file from server
+        if (previousThumbnailPath)
+            await deleteImageFile(previousThumbnailPath);
+
+
+        if (postInfo.images !== null && postInfo.images.length > 0) {
+            // console.log('postInfo.images :>> ', postInfo.images);
+            await Posts_Images.destroy({ where: { posts_id: postInfo.id } });
+            await Promise.all(postInfo.images.map((image) => deleteImageFile(image.path)));
         }
 
-        // previous img exist then delete from db and server!
-        await Posts_Images.destroy({ where: { posts_id: postInfo.id } });
+        // new images is given add it to the database and server.
+        if (blog_images) {
 
-        await Promise.all(postInfo.images.map((image) => deleteImageFile(image.path)));
+            // prepares image file to create
+            let imageFiles = blog_images?.map((image) => ({
+                posts_id: postInfo.id,
+                img_name: image.filename,
+                path: image.path
+            }));
+            // add file path to db 
+            await Posts_Images.bulkCreate(imageFiles);
+        }
 
-        // prepares image file to create
-        let imageFiles = images.map((image) => ({
-            posts_id: postInfo.id,
-            img_name: image.filename,
-            path: image.path
-        }));
-        // add file path to db 
-        await Posts_Images.bulkCreate(imageFiles);
+        // update tags are given then add tags too.
+        if (tags) {
+            toAddTags = await checkTags(tags);
+            await postInfo.setTags(toAddTags);
+        }
+        else {
+            await postInfo.removeTags();
+        }
+        // // }
+
+
     }
 
     static async updateBlogViewCount(postInfoId) {

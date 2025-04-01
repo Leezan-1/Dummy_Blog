@@ -1,5 +1,5 @@
 
-const { Users } = require("../models").sequelize.models
+const { Users } = require("../models")
 const { checkUserPassword, generatePassword } = require("../utils/password");
 const CustomError = require("../utils/CustomError");
 const { validateEmail, validateName, validatePswd } = require("../utils/validations");
