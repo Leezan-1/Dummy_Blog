@@ -20,8 +20,6 @@ const authTokenMW = wrapMiddleware(async (req, res, next) => {
     };
     req.sessionId = userInfo.session_id;
 
-    console.log('userInfo.username :>> ', userInfo.username);
-    console.log('req.params?.username :>> ', req.params?.username);
     // if route has username it checks here with the auth token username
     // if the user is the same of auth token.
     if (req.params?.username) {

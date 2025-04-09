@@ -6,6 +6,7 @@ const ApiResponse = require("../utils/apiMessage");
 
 // ERROR MIDDLEWARE
 const errorHandlerMW = async (err, req, res, next) => {
+    let errorCode, errorMessage;
     let { message, statusCode } = err;
 
     // removes multiple uploaded files from server

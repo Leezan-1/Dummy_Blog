@@ -15,6 +15,12 @@ const pagination = (totalPosts, currentPage, limit) => {
         prevPage = null;
     }
 
-    return { totalPosts, totalPages, currentPage, prevPage, nextPage };
+    return {
+        total_posts: totalPosts,
+        total_pages: totalPages,
+        current_page: currentPage,
+        previous_page: prevPage,
+        next_page: nextPage
+    };
 }
 module.exports = pagination

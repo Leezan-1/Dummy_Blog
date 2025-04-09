@@ -11,15 +11,20 @@ const cookieparser = require('cookie-parser');
 const errorHandlerMW = require("./middlewares/errorMiddleware");
 
 // ROUTERS.
-const authRouter = require('./routes/authRoute');
-const blogsRouter = require('./routes/blogsRoute');
-const tagsRouter = require('./routes/tagsRoute');
-const usersRouter = require('./routes/usersRoute');
+// const authRouter = require('./routes/authRoute');
+// const blogsRouter = require('./routes/blogsRoute');
+// const tagsRouter = require('./routes/tagsRoute');
+// const usersRouter = require('./routes/usersRoute');
+const { authRouter, blogsRouter, tagsRouter, usersRouter } = require("./routes");
 
 // MIDDLEWARES.
-app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieparser(process.env.COOKIE_SECRET));
+
+// Serving static files
+const publicDir = path.resolve(__dirname, 'public');
+app.use('/public', express.static(publicDir));
 
 // ROUTES using Routers
 // routes that handles user login and session authentication
@@ -30,9 +35,6 @@ app.use('/v1/api/blogs', blogsRouter);
 app.use('/v1/api/tags', tagsRouter);
 
 app.use('/v1/api/users', usersRouter);
-// Serving static files
-const publicDir = path.resolve(__dirname, 'public');
-app.use('/public', express.static(publicDir));
 
 // 404 PAGE
 app.use(async (req, res) => {

@@ -1,3 +1,4 @@
+const { pagination } = require("../utils");
 const imageUrlGenerator = require("../utils/imageUrlGenerator");
 
 const toDuration = (createdAt) => {
@@ -39,8 +40,8 @@ class PostInfo {
             thumbnail_image: post?.thumbnail,
             thumbnail_url: imageUrlGenerator(post?.thumbnail_path),
             content: post?.description,
-            author: `${post?.author.first_name} ${post?.author.last_name}`,
-            username: `@${post?.author.username}`,
+            author: `${post?.author?.first_name} ${post?.author?.last_name}`,
+            username: `@${post?.author?.username}`,
             duration: toDuration(post?.createdAt),
             images: post?.images?.map((img) => ({
                 image_name: img.img_name,
@@ -52,37 +53,14 @@ class PostInfo {
         }
     }
 
-    static toCollectionResponse(posts, paginationData) {
+    static toCollectionResponse(posts, page, limit) {
         return {
-            metadata: {
-                total_posts: paginationData?.totalPosts,
-                total_pages: paginationData?.totalPages,
-                current_page: paginationData?.currentPage,
-                prev_page: paginationData?.prevPage,
-                next_page: paginationData?.nextPage
-            },
-            posts: posts?.map((post) => {
+            metadata: pagination(posts?.count, page, limit),
+            posts: posts?.rows?.map((post) => {
                 const response = this.toResponse(post);
-                delete (response?.tags);
                 delete (response?.content);
                 delete (response?.images);
-                // {
 
-                //     id: post?.id,
-                //     uuid: post?.uuid,
-                //     slug: post?.slug,
-                //     title: post?.title,
-                //     excerpt: post?.excerpt,
-                //     // thumbnail_image: post?.thumbnail,
-                //     // thumbnail_url: image_url_generator(post?.thumbnail_path),
-                //     author: `${post?.author?.first_name} ${post?.author?.last_name}`,
-                //     views: post?.view_count,
-
-                //     duration: toDuration(post?.createdAt),
-                //     tags: post?.tags?.map((tag) => (tag?.name)),
-                //     is_visible: post?.visible,
-                //     is_featured: post?.featured,
-                // }
                 return response;
             }
             )

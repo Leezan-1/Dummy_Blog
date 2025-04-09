@@ -46,11 +46,11 @@ class AuthService {
         // find users with email address.
         let dbUser = await this.getUserByEmail(userInfo.email);
         if (!dbUser)
-            throw new CustomError('Email or Password did not match', 401);
+            throw new CustomError('Email or Password did not match', 403);
 
         // check password is valid, if false send error
         if (!(await checkUserPassword(password, dbUser.password)))
-            throw new CustomError('Email or password did not match', 401);
+            throw new CustomError('Email or password did not match', 403);
 
         // const { password, createdAt, ...cleanUserData } = user;
 

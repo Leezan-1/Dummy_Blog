@@ -11,8 +11,8 @@ class TagService {
     }
 
     static async getTagName(tagName) {
-        const fectchedTag = await Tags.findOne({ where: { name: tagName } });
-        return fectchedTag;
+        const fetchedTag = await Tags.findOne({ where: { name: tagName } });
+        return fetchedTag;
     }
 
     static async createNewTag(tagName) {
@@ -49,12 +49,12 @@ class TagService {
         );
 
         if (![updated])
-            throw new CustomError('Couldnot update tag', 400);
+            throw new CustomError('Could not update tag', 400);
     }
 
     static async deleteTag(tagName) {
         if (!(await this.getTagName(tagName)))
-            throw new CustomError('Tag doesnot exist', 404);
+            throw new CustomError('Tag does not exist', 404);
 
         await Tags.destroy({ where: { name: tagName } });
 

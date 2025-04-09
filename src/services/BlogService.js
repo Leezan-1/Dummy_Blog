@@ -1,8 +1,9 @@
-const fs = require('fs');
-const { generateSlug, CustomError, pagination } = require('../utils');
-const { validatePostTitle, validatePostExcerpt } = require('../utils/validations');
+const { generateSlug, CustomError, pagination } = require("../utils");
+const { validatePostTitle, validatePostExcerpt, validateTags } = require("../utils/validations");
+const deleteFile = require("../utils/deleteFile");
 
-const { Posts, Posts_Images, Tags, Users } = require('../models');
+const { Posts, Posts_Images, Tags, Users } = require("../models");
+const { Op } = require("sequelize");
 
 async function checkTags(tags) {
     let tagsArray = tags
@@ -13,93 +14,61 @@ async function checkTags(tags) {
     return tagInstance.map(([item]) => item);
 }
 
-async function deleteImageFile(imagePath) {
-    await fs.promises.unlink(imagePath)
-        .catch((err) => { console.error(`Failed to delete image file ${imagePath}`, err) });
+function getWhereCondition(queryOptions) {
+    const conditions = {};
+
+    if (queryOptions?.userId) {
+        conditions[Op.and] = {
+            users_id: queryOptions?.userId,
+            ["$author.username$"]: queryOptions?.username,
+        }
+    }
+    if (queryOptions?.isFeatured) {
+        conditions.featured = true;
+    }
+
+    return conditions;
 }
 
 class BlogService {
 
     // gets all posts joining images and tags
-    static async getAllPosts(page, limit) {
+    static async getAllBlogPosts(page, limit, queryOptions) {
 
-        // pagination logic
+        // Build where clause
+        const whereConditions = getWhereCondition(queryOptions);
 
-        let totalPosts = await Posts.count();
-        const paginationData = pagination(totalPosts, page, limit);
-        // offset is calculated later because we have to send data to 
-        let offset = Math.floor((paginationData.currentPage - 1) * limit);
+        // if (queryOptions?.tags)
+        const tagsArray = validateTags(queryOptions?.tags);
 
-
-        const allPosts = await Posts.findAll({
-            // attributes: ['id', 'uuid', 'title', 'slug', 'view_count', 'createdAt', 'visible', 'featured'],
+        // const includeTags = getIncludeTags(queryOptions?.tags);
+        const allPosts = await Posts.findAndCountAll({
+            // remember this returns count (total posts) and rows(post obj in array)
+            // this counts duplicate data while using join, so distinct should be true.
             include: [
                 {
                     model: Users,
-                    as: 'author',
+                    as: "author",
                     required: true,
-                    attributes: ['first_name', 'last_name', 'username'],
                     right: true,
+                    attributes: ["first_name", "last_name", "username"],
                 },
                 {
                     model: Tags,
-                    as: 'tags',
+                    as: "tags",
+                    through: { attributes: [] },
+                    attributes: ["name"],
+                    where: tagsArray.length > 0 ? { name: { [Op.in]: tagsArray } } : null,
                 }
             ],
-            offset: offset,
+            where: whereConditions,
+            offset: Math.floor((page - 1)) * limit,
             limit: limit,
-            order: ['uuid'],
+            order: ["uuid"],
+            distinct: true,
         });
 
-        if (![allPosts])
-            throw new CustomError('No post found', 404);
-
-
-        return { allPosts, paginationData };
-    }
-
-    // get all posts by users_id and username
-    static async getAllPostsByUser(userId, username, page, limit) {
-
-        let totalPosts = await Posts.count({ where: { users_id: userId } });
-        const paginationData = pagination(totalPosts, page, limit);
-        // offset is calculated later because we have to send data to 
-        let offset = Math.floor((paginationData.currentPage - 1) * limit);
-
-        const posts = await Posts.findAll(
-            {
-                // attributes: ['id', 'uuid', 'title', 'slug', 'view_count', 'createdAt', 'visible', 'featured'],
-
-                where: { users_id: userId },
-
-                // joins images and tags tables
-                include: [
-                    {
-                        model: Users,
-                        as: 'author',
-                        required: true,
-                        attributes: ['first_name', 'last_name', 'username'],
-                        right: true,
-                    },
-                    {
-                        model: Posts_Images,
-                        as: 'images',
-                    },
-                    {
-                        model: Tags,
-                        as: "tags",
-                        // required: true,
-                    }
-                ],
-                offset: offset,
-                order: ['uuid'],
-            }
-        );
-
-        if (username.split('@')[1] !== posts?.[0].author.username)
-            throw new CustomError("User fd not Found!", 404);
-
-        return { posts, paginationData };
+        return allPosts;
     }
 
     // get single post of a user using slug field of post
@@ -112,14 +81,14 @@ class BlogService {
                 include: [
                     {
                         model: Users,
-                        as: 'author',
+                        as: "author",
                         required: true,
-                        attributes: ['first_name', 'last_name', 'username'],
+                        attributes: ["first_name", "last_name", "username"],
                         right: true,
                     },
                     {
                         model: Posts_Images,
-                        as: 'images',
+                        as: "images",
                     },
                     {
                         model: Tags,
@@ -127,11 +96,11 @@ class BlogService {
                         // required: true,
                     }
                 ],
-                order: ['uuid'],
+                order: ["uuid"],
             }
         );
         if (!post)
-            throw new CustomError('Post not found', 404);
+            throw new CustomError("Post not found", 404);
         return post;
     }
 
@@ -139,7 +108,7 @@ class BlogService {
     static async getSinglePostByID(postId) {
 
         if (isNaN(postId)) {
-            throw new CustomError('Post Not Found', 404)
+            throw new CustomError("Post Not Found", 404)
         }
         // post_id searches for post
         const post = await Posts.findByPk(postId,
@@ -148,14 +117,14 @@ class BlogService {
                 include: [
                     {
                         model: Users,
-                        as: 'author',
+                        as: "author",
                         required: true,
-                        attributes: ['first_name', 'last_name', 'username'],
+                        attributes: ["first_name", "last_name", "username"],
                         right: true,
                     },
                     {
                         model: Posts_Images,
-                        as: 'images',
+                        as: "images",
                     },
                     {
                         model: Tags,
@@ -163,163 +132,175 @@ class BlogService {
                         // required: true,
                     }
                 ],
-                order: ['createdAt', 'uuid'],
+                order: ["createdAt", "uuid"],
             }
         );
 
         if (!post)
-            throw new CustomError('Post not found', 404);
+            throw new CustomError("Post not found", 404);
 
         return post;
 
     }
-
+z``
     // service that creates new blog post
     static async createBlogPost(userId, formPostInfo, postImages) {
-        const { title, excerpt, tags, description } = formPostInfo;
+    const { title, excerpt, tags, description } = formPostInfo;
 
-        // validates post form body
+    // validates post form body
 
-        validatePostTitle(title);
-        validatePostExcerpt(excerpt);
-        // VALIDATE tags and description.
-        // convert tags into array while validating
+    validatePostTitle(title);
+    validatePostExcerpt(excerpt);
+    // VALIDATE tags and description.
+    // convert tags into array while validating
 
-        // generates slug for the post
-        let postSlug = await generateSlug(title);
+    // generates slug for the post
+    let postSlug = await generateSlug(title);
 
-        let thumbnail_img = postImages['thumbnail-image']?.[0];
-        let blog_images = postImages['blog-images'];
+    let thumbnail_img = postImages["thumbnail-image"]?.[0];
+    let blog_images = postImages["blog-images"];
 
-        if (!thumbnail_img) {
-            thumbnail_img = blog_images?.[0];
-        }
-
-        // creates the post first.
-        const post = await Posts.create({
-            title: title,
-            slug: postSlug,
-            excerpt: excerpt,
-            description: description,
-            thumbnail: thumbnail_img?.filename,
-            thumbnail_path: thumbnail_img?.path,
-            users_id: userId
-        });
-
-        // adds tags for the post if tags is sent with it
-        if (tags) {
-            const toAddTags = await checkTags(tags);
-            // adds tags to the post associated with tags.
-            await post.addTags(toAddTags);
-        }
-
-        if (blog_images) {
-            // add images to post_images table
-            let imageFiles = blog_images?.map((image) => ({
-                posts_id: post.id,
-                img_name: image.filename,
-                path: image.path
-            }));
-            await Posts_Images.bulkCreate(imageFiles);
-        }
-
+    if (!thumbnail_img) {
+        thumbnail_img = blog_images?.[0];
     }
+
+    // creates the post first.
+    const post = await Posts.create({
+        title: title,
+        slug: postSlug,
+        excerpt: excerpt,
+        description: description,
+        thumbnail: thumbnail_img?.filename,
+        thumbnail_path: thumbnail_img?.path,
+        users_id: userId
+    });
+
+    // adds tags for the post if tags is sent with it
+    if (tags) {
+        const toAddTags = await checkTags(tags);
+        // adds tags to the post associated with tags.
+        await post.addTags(toAddTags);
+    }
+
+    if (blog_images) {
+        // add images to post_images table
+        let imageFiles = blog_images?.map((image) => ({
+            posts_id: post.id,
+            img_name: image.filename,
+            path: image.path
+        }));
+        await Posts_Images.bulkCreate(imageFiles);
+    }
+
+}
 
     // service that deletes the post by its id.
     static async deleteBlogPost(userId, postInfo) {
 
-        if (userId != postInfo.users_id)
-            throw new CustomError('Invalid user trying to delete post', 401);
+    if (userId != postInfo.users_id)
+        throw new CustomError("Invalid user trying to delete post", 401);
 
-        let deleted = await postInfo.destroy();
-        // let deleted = await Posts.destroy({ where: { id: postInfo.id } });
-        if (deleted)
-            postInfo.images.map((image) => deleteImageFile(image.path));
-        else
-            throw new CustomError('Could not delete post', 400);
+    let deleted = await postInfo.destroy();
+    // let deleted = await Posts.destroy({ where: { id: postInfo.id } });
+    if (deleted)
+        postInfo.images.map((image) => deleteFile(image.path));
+    else
+        throw new CustomError("Could not delete post", 400);
 
-        return (deleted) ? true : false;
-    }
+    return (deleted) ? true : false;
+}
 
     static async updateBlogPost(userId, postInfo, updatePostInfo, images) {
 
-        // Error if user is not the author of the post.
-        if (userId != postInfo.users_id)
-            throw new CustomError('Invalid user trying to update post', 401);
+    // Error if user is not the author of the post.
+    if (userId != postInfo.users_id)
+        throw new CustomError("Invalid user trying to update post", 401);
 
-        // validate form data
-        const { title, excerpt, tags, description } = updatePostInfo;
-        validatePostTitle(title);
-        validatePostExcerpt(excerpt);
-        // VALIDATE tags and description
-        // tags should be lowercase and be in array
+    // validate form data
+    const { title, excerpt, tags, description } = updatePostInfo;
+    validatePostTitle(title);
+    validatePostExcerpt(excerpt);
+    // VALIDATE tags and description
+    // tags should be lowercase and be in array
 
-        // If thumbnail is not given, then first image of blog_image is the thumbnail!
-        let thumbnail_img = images['thumbnail-image']?.[0];
-        let blog_images = images['blog-images'];
+    // If thumbnail is not given, then first image of blog_image is the thumbnail!
+    let thumbnail_img = images["thumbnail-image"]?.[0];
+    let blog_images = images["blog-images"];
 
-        if (!thumbnail_img) {
-            thumbnail_img = blog_images?.[0];
-        }
-
-        // update the fields of the post along with thumbnail
-        let previousThumbnailPath = postInfo.thumbnail_path;
-        const updated = await postInfo.update({
-            title: title,
-            excerpt: excerpt,
-            description: description,
-            thumbnail: thumbnail_img?.filename,
-            thumbnail_path: thumbnail_img?.path
-        });
-        if (!updated) {
-            throw new CustomError('Could not update post', 400);
-        }
-
-        // remove previous image file from server
-        if (previousThumbnailPath)
-            await deleteImageFile(previousThumbnailPath);
-
-
-        if (postInfo.images !== null && postInfo.images.length > 0) {
-            // console.log('postInfo.images :>> ', postInfo.images);
-            await Posts_Images.destroy({ where: { posts_id: postInfo.id } });
-            await Promise.all(postInfo.images.map((image) => deleteImageFile(image.path)));
-        }
-
-        // new images is given add it to the database and server.
-        if (blog_images) {
-
-            // prepares image file to create
-            let imageFiles = blog_images?.map((image) => ({
-                posts_id: postInfo.id,
-                img_name: image.filename,
-                path: image.path
-            }));
-            // add file path to db 
-            await Posts_Images.bulkCreate(imageFiles);
-        }
-
-        // update tags are given then add tags too.
-        if (tags) {
-            toAddTags = await checkTags(tags);
-            await postInfo.setTags(toAddTags);
-        }
-        else {
-            await postInfo.removeTags();
-        }
-        // // }
-
-
+    if (!thumbnail_img) {
+        thumbnail_img = blog_images?.[0];
     }
 
-    static async updateBlogViewCount(postInfoId) {
-        let updatedPost = await Posts.increment({ view_count: 1 }, { where: { id: postInfoId } });
-
-        // if updated is not 1, then it is an error
-        if (![updatedPost])
-            throw new CustomError('Could not updated user data!', 400);
-
+    // update the fields of the post along with thumbnail
+    let previousThumbnailPath = postInfo.thumbnail_path;
+    const updated = await postInfo.update({
+        title: title,
+        excerpt: excerpt,
+        description: description,
+        thumbnail: thumbnail_img?.filename,
+        thumbnail_path: thumbnail_img?.path
+    });
+    if (!updated) {
+        throw new CustomError("Could not update post", 400);
     }
+
+    // remove previous image file from server
+    if (previousThumbnailPath)
+        await deleteFile(previousThumbnailPath);
+
+
+    if (postInfo.images !== null && postInfo.images.length > 0) {
+        // console.log("postInfo.images :>> ", postInfo.images);
+        await Posts_Images.destroy({ where: { posts_id: postInfo.id } });
+        await Promise.all(postInfo.images.map((image) => deleteFile(image.path)));
+    }
+
+    // new images is given add it to the database and server.
+    if (blog_images) {
+
+        // prepares image file to create
+        let imageFiles = blog_images?.map((image) => ({
+            posts_id: postInfo.id,
+            img_name: image.filename,
+            path: image.path
+        }));
+        // add file path to db 
+        await Posts_Images.bulkCreate(imageFiles);
+    }
+
+    // update tags are given then add tags too.
+    if (tags) {
+        toAddTags = await checkTags(tags);
+        await postInfo.setTags(toAddTags);
+    }
+    else {
+        await postInfo.removeTags();
+    }
+    // // }
+
+
+}
+
+    static async updateBlogViewCount(postId) {
+    if (isNaN(postId))
+        throw new CustomError("Post Not Found!", 404);
+
+    let updatedPost = await Posts.increment({ view_count: 1 }, { where: { id: postId } });
+
+    // if updated is not 1, then it is an error
+    if (![updatedPost])
+        throw new CustomError("Could not updated view count of the post!", 400);
+
+}
+
+    static async updateBlogFeaturedFlag(postId) {
+    if (isNaN(postId))
+        throw new CustomError("Post Not Found!", 404);
+
+    let updatedFlag = Posts.update({ featured: true }, { where: { id: postId } })
+    if (![updatedFlag])
+        throw new CustomError("Could not update featured flag of the post!", 400)
+}
 }
 
 module.exports = BlogService;

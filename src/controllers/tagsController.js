@@ -7,7 +7,7 @@ const getAllTagsCTLR = wrapController(async (req, res) => {
     const tags = await TagService.getAllTags();
 
     const toResponse = TagInfo.sendAllTags(tags);
-    res.status(200).json(ApiResponse.success(200, null, toResponse));
+    res.status(200).json(ApiResponse.success(200, "All tags fetched!", toResponse));
 
 });
 
@@ -35,7 +35,7 @@ const deleteTagCTLR = wrapController(async (req, res) => {
 
     await TagService.deleteTag(tagName);
 
-    res.status(200).json(ApiResponse.success(200, 'Tag deleted succesffully'));
+    res.status(200).json(ApiResponse.success(200, 'Tag deleted successfully'));
 });
 
 module.exports = {

@@ -13,13 +13,14 @@ const getAllPostsCTLR = wrapController(async (req, res) => {
     // if page and limit are NaN then default is 1 and 10
     let page = Number(req.query?.page) || 1;
     let limit = Number(req.query?.limit) || 10;
-    let tags = req.query?.tags || "latest";
-
-
+    const queryOptions = {
+        isFeatured: (req.query?.featured == '1') ? true : undefined,
+        tags: req.query?.tags
+    }
     // service that gets all posts and its info with images
-    const { allPosts, paginationData } = await BlogService.getAllPosts(page, limit);
+    const allPosts = await BlogService.getAllBlogPosts(page, limit, queryOptions);
 
-    const toUserResponse = PostInfo.toCollectionResponse(allPosts, paginationData);
+    const toUserResponse = PostInfo.toCollectionResponse(allPosts, page, limit);
 
     // All post retrieved!
     return res.status(200).json(ApiResponse.success(200, "All Blogs Data Fetched!", toUserResponse));
@@ -96,11 +97,20 @@ const deletePostCTLR = wrapController(async (req, res) => {
 
 });
 
+// update the post to be featured!
+const updateFeatureFlagCTLR = wrapController(async (req, res) => {
+    let postId = Number(req.params?.post_id);
+
+    await BlogService.updateBlogFeaturedFlag(postId);
+
+    res.json(ApiResponse.success(200, "Featured Flag updated!"))
+});
 
 module.exports = {
     getAllPostsCTLR,
     getSinglePostCTLR,
     createNewPostCTLR,
     updatePostCTLR,
+    updateFeatureFlagCTLR,
     deletePostCTLR,
 };

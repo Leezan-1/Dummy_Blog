@@ -47,11 +47,17 @@ function validatePostExcerpt(excerpt) {
     throw new CustomError('Invalid Post Excerpt: Excerpt must be 30 to 150 character long.', 406);
 }
 
-function validateTagName(tagName) {
-    const tagNameRegex = /^[A-Za-z]{1,15}$/;
-    if (tagName && tagNameRegex.test(tagName))
-        return tagName;
-    throw new CustomError('Invalid Tag Name: Tag name must be aphabet and only 15 character long.', 400);
+function validateTags(tags) {
+    const tagNameRegex = /^[A-Za-z]{2,20}$/;
+    if (!tags)
+        return [];
+
+    if (!Array.isArray(tags)) {
+        tags = [tags.toLowerCase()];
+    }
+
+    return tags.filter((tag) => tagNameRegex.test(tag.toLowerCase()));
+
 }
 
 // validates description of blog post
@@ -65,5 +71,5 @@ module.exports = {
     validatePswd,
     validatePostTitle,
     validatePostExcerpt,
-    validateTagName
+    validateTags
 }
