@@ -1,13 +1,12 @@
-// importing express and Request Response type
-import express, { Request, Response } from 'express';
+// importing built-in modules
+import express from 'express';
 import path from 'path';
 import cookieparser from 'cookie-parser';
-// cookieparser
-// Response message type.
-import ResponseMessage from './interfaces/ResponseMessage';
+
 // routers
 import authRouter from './routes/auth.route';
 // middlewares
+import route404MW from './middlewares/route404.middleware';
 import errorHandlerMW from './middlewares/errorHandler.middleware';
 
 const app = express();
@@ -28,22 +27,7 @@ app.use("/v1/api/auth", authRouter);
 // app.use("v1/api/users");
 
 // 404 PAGE
-app.use(async (req: Request, res: Response) => {
-    const responseCode = 404;
-
-    const responseMsg: ResponseMessage = {
-        code: responseCode,
-        success: false,
-        message: "Not Found",
-        error: {
-            reason: "Route not found!",
-            message: "Route you are trying to access does not exist"
-        },
-    };
-
-    // console.log("404");
-    res.status(responseCode).json(responseMsg);
-});
+app.use(route404MW);
 
 // ERROR HANDLER MIDDLEWARE
 app.use(errorHandlerMW);
