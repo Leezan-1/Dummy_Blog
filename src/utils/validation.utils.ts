@@ -29,7 +29,7 @@ export function validatePostTitle(title: string): void {
     // title should be 10-100 characters long
     // allowed characters : letters, numbers, spaces,  . , ! ? ' " -
     if (!title || !titleRegex.test(title))
-        throw new CustomError(400, 'Invalid Post Title: Title must be 10 - 100 character long.');
+        throw new CustomError(400, 'invalid post title: title must be 10 - 100 character long.');
 }
 
 // validates excerpt of blog post
@@ -39,17 +39,21 @@ export function validatePostExcerpt(excerpt: string): void {
     const excerptRegex = /^(?=.{30,150}$)[\s\S]+$/;
     if (!excerpt || !excerptRegex.test(excerpt))
 
-        throw new CustomError(400, 'Invalid Post Excerpt: Excerpt must be 30 to 150 character long.');
+        throw new CustomError(400, 'invalid post excerpt: excerpt must be 30 - 150 character long.');
 }
 
-export function validateTags(tags: string | string[]): string[] {
+export function validateTags(tags: string | string[]): void {
     const tagNameRegex = /^[A-Za-z]{2,20}$/;
-    if (!tags)
-        return [];
 
-    if (typeof tags === "string")
-        tags = [tags.toLowerCase()];
+    if (typeof tags === "string") {
+        if (!tags || !tagNameRegex.test(tags))
+            throw new CustomError(400, "invalid tag name: tag name must be 2 - 20 character long");
+    }
 
-    return tags.filter((tag) => tagNameRegex.test(tag.toLowerCase()));
+
+    // if (typeof tags === "string")
+    //     tags = [tags.toLowerCase()];
+
+    // return tags.filter((tag) => tagNameRegex.test(tag.toLowerCase()));
 
 }

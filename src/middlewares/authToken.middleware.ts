@@ -12,7 +12,7 @@ export const authTokenMW = wrapRequestFunction(async (req: AuthenticatedRequest,
 
     req.user = {
         id: userInfo.uid,
-        username: userInfo.username
+        username: userInfo.sub!
     };
     req.sessionId = userInfo.jti!;
 
