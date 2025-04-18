@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 config();
 
-import app from "./app.ttts";
+import app from "./app";
 import db from './models';
 
 const startServer = async () => {

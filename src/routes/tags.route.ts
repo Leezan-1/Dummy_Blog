@@ -13,6 +13,6 @@ router.route("/:tagName").all(authTokenMW)
     .delete(deleteTagCTLR)
 
 router.route("/:prevTag/:newTag")
-    .patch(updateTagCTLR);
+    .patch(authTokenMW, updateTagCTLR);
 
 export default router;
