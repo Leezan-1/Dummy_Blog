@@ -1,15 +1,47 @@
-import { Model, Table, Column, DataType, ForeignKey, BelongsTo, HasMany, BelongsToMany } from 'sequelize-typescript';
+import { Model, Table, Column, DataType, ForeignKey, BelongsTo, HasMany, BelongsToMany, Scopes } from 'sequelize-typescript';
 import { User } from './User';
 import { Post_Images } from './Post_Images';
 import { Tag } from './Tag';
 import { Post_Tag } from './Post_Tag';
+
+@Scopes(() => ({
+    includeUser: () => ({
+        include: [
+            {
+                model: User,
+                as: "author",
+                attributes: ["username"],
+                required: true,
+                right: true,
+            }
+        ]
+    }),
+
+    includeImages: () => ({
+        include: [
+            {
+                model: Post_Images,
+                as: "images",
+            },
+        ]
+    }),
+    includeTags: () => ({
+
+        model: Tag,
+        as: "tag",
+        through: {
+            attributes: []
+        },
+        attributes: ['name'],
+    })
+
+}))
 
 @Table({
     tableName: "post",
     modelName: "Post",
     timestamps: true,
 })
-
 export class Post extends Model {
 
     @Column({
@@ -88,18 +120,18 @@ export class Post extends Model {
     })
     visible!: boolean
 
-    @ForeignKey(() => User)
+    @ForeignKey(() => User,)
     @Column({
         type: DataType.INTEGER,
         allowNull: false
     })
     user_id!: number
 
-    @BelongsTo(() => User)
-    user!: User
+    @BelongsTo(() => User, { as: "author" })
+    author!: User
 
-    @HasMany(() => Post_Images)
-    post_images!: Post_Images[]
+    @HasMany(() => Post_Images, { as: "images" })
+    images!: Post_Images[]
 
     @BelongsToMany(() => Tag, () => Post_Tag)
     tags!: Tag[]

@@ -8,6 +8,7 @@ const startServer = async () => {
     try {
         await db.sequelize.authenticate();
         // await db.sequelize.sync({ force: true });
+        // await db.sequelize.sync({ alter: true });
         app.listen(process.env.PORT || 5000, () => {
             console.log(`Server running at http://localhost:${process.env.PORT}`);
         })

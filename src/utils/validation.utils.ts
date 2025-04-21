@@ -45,15 +45,20 @@ export function validatePostExcerpt(excerpt: string): void {
 export function validateTags(tags: string | string[]): void {
     const tagNameRegex = /^[A-Za-z]{2,20}$/;
 
+    // if (!tags) {
+    //     return;
+    // }
+
     if (typeof tags === "string") {
         if (!tags || !tagNameRegex.test(tags))
-            throw new CustomError(400, "invalid tag name: tag name must be 2 - 20 character long");
+            throw new CustomError(400, "invalid tag name: tag name must be 2 - 20 alphabet long");
     }
 
-
-    // if (typeof tags === "string")
-    //     tags = [tags.toLowerCase()];
-
-    // return tags.filter((tag) => tagNameRegex.test(tag.toLowerCase()));
+    else {
+        tags.forEach((tag) => {
+            if (!tag || !tagNameRegex.test(tag))
+                throw new CustomError(400, "invalid tag name: tag name must be 2 - 20 alphabet long")
+        });
+    }
 
 }

@@ -13,14 +13,23 @@ export default class TagService {
         return Tag.findOne({ where: { name: tagName } });
     }
 
-    static async checkTagsExist(tagName: string | string[]): Promise<boolean> {
+    static async checkTagsExist(tagName: string | string[]): Promise<Tag | Tag[] | null> {
         // all validations logics and db check go here
-        let tagExist: Tag | null = null;
 
         if (typeof tagName === "string") {
-            tagExist = await this.getSingleTag(tagName);
+            return await this.getSingleTag(tagName);
         }
-        return (tagExist) ? true : false;
+        else {
+            const allTags = await this.getAllTags();
+            let allTagsInstances: Tag[] = [];
+            for (const tag of allTags) {
+                for (const tagNam of tagName) {
+                    if (tagNam === tag.name)
+                        allTagsInstances.push(tag);
+                }
+            }
+            return allTagsInstances!;
+        }
     }
 
     static async createTag(newTagName: string): Promise<Tag> {

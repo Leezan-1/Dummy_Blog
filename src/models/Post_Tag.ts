@@ -10,10 +10,10 @@ export class Post_Tag extends Model {
 
     @ForeignKey(() => Post)
     @Column({ type: DataType.INTEGER })
-    post_id!: number
+    post_id!: number;
 
     @ForeignKey(() => Tag)
     @Column({ type: DataType.INTEGER })
-    tag_id!: number
+    tag_id!: number;
 
 }
