@@ -1,8 +1,8 @@
 
-const pagination = (totalPosts, currentPage, limit) => {
+export const pagination = (totalPosts: number, currentPage: number, limit: number) => {
     let totalPages = Math.ceil(totalPosts / limit);
-    let nextPage = currentPage + 1;
-    let prevPage = currentPage - 1;
+    let nextPage: number | null = currentPage + 1;
+    let prevPage: number | null = currentPage - 1;
 
     if (currentPage >= totalPages) {
         currentPage = totalPages;
@@ -23,4 +23,3 @@ const pagination = (totalPosts, currentPage, limit) => {
         next_page: nextPage
     };
 }
-module.exports = pagination

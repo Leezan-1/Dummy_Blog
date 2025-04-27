@@ -4,7 +4,7 @@ import { LoginForm, SignUpForm } from "../interfaces/UserForm.interface";
 // utils functions
 import { validateEmail, validateName, validatePswd } from "../utils/validation.utils";
 import CustomError from "../utils/CustomError.utils";
-import { checkUserPassword, generatePassword } from "../utils/generatePassword.utils";
+import { checkUserPassword, generatePassword } from "../utils/generate.utils";
 
 // Models
 import { User } from "../models/User";

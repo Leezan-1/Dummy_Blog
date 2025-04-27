@@ -1,30 +1,58 @@
-// models
-import { Post } from "../models/Post";
-
-
-import { Post_Images } from "../models/Post_Images";
-
 // interfaces
 import PostFrom from "../interfaces/PostForm.interface";
+import { WhereOptions } from "sequelize";
 
+// models
+import { Post } from "../models/Post";
 import { Tag } from "../models/Tag";
+import { Post_Images } from "../models/Post_Images";
+
+// services
 import TagService from "./Tag.service";
 
 // utility function
 import CustomError from "../utils/CustomError.utils";
-import { generateSlug } from "../utils/generateSlug.utils";
 import { validatePostExcerpt, validatePostTitle, validateTags } from "../utils/validation.utils";
 import deleteImageFile from "../utils/deleteImageFile.utils";
+import { generateSlug } from "../utils/generate.utils";
+import { QueryOpt } from "../interfaces/QueryOptions.interface";
+import { PostScope } from "../interfaces/WhereClause.interface";
 
 export class PostService {
 
-    static async getSinglePost(postIdOrSlug: number | string, userId?: number): Promise<Post> {
+    static async getAllPost(query: QueryOpt) {
+        const includeScope: PostScope[] = ["includeUser", "includeTags"];
+        const whereCondition: WhereOptions = {};
 
-        if (!postIdOrSlug) {
-            throw new CustomError(400, "invalid post id or slug");
+        if (query.isFeatured)
+            whereCondition.featured = true;
+
+        if (query.tags) {
+            const tagNames = Array.isArray(query.tags) ? query.tags : [query.tags];
+            includeScope.push({ method: ['filterByTags', tagNames] });
         }
 
-        const post = await Post.scope(['includeUser', "includeImages"]).findByPk(postIdOrSlug);
+        return Post.scope(includeScope).findAndCountAll({
+            where: whereCondition,
+            offset: Math.floor((query.page - 1) * query.limit),
+            limit: query.limit,
+            distinct: true,
+            col: 'Post.id'
+        });
+
+    }
+
+    static async getSinglePost(idOrSlug: number | string, include = true): Promise<Post> {
+        if (!idOrSlug)
+            throw new CustomError(400, "invalid post id or slug");
+
+
+        const scopes = include
+            ? ['includeUser', 'includeImages', 'includeTags']
+            : [];
+
+        const post = await Post.scope(scopes).findByPk(idOrSlug);
+
         if (!post)
             throw new CustomError(404, "no post found with the given id");
 
@@ -76,7 +104,7 @@ export class PostService {
             await Post_Images.bulkCreate(imageFiles);
         }
         // if (toAddTags!)
-        await post.$add('tags', toAddTags!);
+        await post.$add("tags", toAddTags!);
         return post;
     }
 
@@ -116,7 +144,7 @@ export class PostService {
             description: description,
         });
 
-        await updated.$set('tags', toSetTags!);
+        await updated.$set("tags", toSetTags!);
 
 
         if (thumbnailImg?.path && prevThumbnailPath)
@@ -124,7 +152,7 @@ export class PostService {
 
         // 🔥 Delete all previously associated images
         if (postInfo.images?.length) {
-            // console.log('postInfo.images :>> ', postInfo.images);
+            // console.log("postInfo.images :>> ", postInfo.images);
             for (const image of postInfo.images) {
                 if (image.path === prevThumbnailPath) {
                     image.destroy();
@@ -168,5 +196,14 @@ export class PostService {
         if (postInfo.thumbnail_path) {
             deleteImageFile(postInfo.thumbnail_path);
         }
+    }
+
+    static async updateFeatureFlag(postInfo: Post, postId?: number) {
+        let updatedFlag = await postInfo.update({ featured: true });
+        // let updatedFlag = await Post.update({ featured: true }, { where: { id: postId } });
+
+        if (!updatedFlag.featured !== true)
+            throw new CustomError(400, "could not update feature flag");
+
     }
 }

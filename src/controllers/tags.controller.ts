@@ -1,4 +1,5 @@
 import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
+import { TagsInfo } from "../resources/TagsInfo";
 import TagService from "../services/Tag.service";
 import { apiSuccessMsg } from "../utils/apiMessage.utils";
 import wrapRequestFunction from "../utils/wrapRequestFunction.utils";
@@ -9,8 +10,7 @@ export const getAllTagsCTLR = wrapRequestFunction(async (req, res) => {
 
     // response
     const resCode = 200;
-    const resMsg = apiSuccessMsg(resCode, "all tags fetched", allTags);
-    res.status(resCode).json(resMsg);
+    res.status(resCode).json(apiSuccessMsg(resCode, "all tags fetched", TagsInfo.sendAllTags(allTags)));
 });
 
 export const createNewTagCTLR = wrapRequestFunction(async (req: AuthenticatedRequest, res) => {
@@ -21,8 +21,7 @@ export const createNewTagCTLR = wrapRequestFunction(async (req: AuthenticatedReq
 
     // response
     const resCode = 201;
-    const resMsg = apiSuccessMsg(resCode, "new tag created successfully");
-    res.status(resCode).json(resMsg);
+    res.status(resCode).json(apiSuccessMsg(resCode, "new tag created successfully"));
 });
 
 export const updateTagCTLR = wrapRequestFunction(async (req: AuthenticatedRequest, res) => {
