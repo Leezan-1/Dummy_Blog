@@ -1,0 +1,26 @@
+import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
+import { PostInfo } from "../resources/PostInfo";
+import { PostService } from "../services/Post.service";
+import { apiSuccessMsg } from "../utils/apiMessage.utils";
+import wrapRequestFunction from "../utils/wrapRequestFunction.utils";
+
+
+export const getUserPosts = wrapRequestFunction(async (req: AuthenticatedRequest, res) => {
+
+
+    const query = {
+        page: Number(req.query?.page) || 1,
+        limit: Number(req.query?.limit) || 10,
+        uid: req.user?.id,
+        username: req.params.uname.split('@')[1]
+    };
+
+    const allPost = await PostService.getAllPost(query);
+
+    let resCode = 200;
+    res.status(resCode).json(
+        apiSuccessMsg(resCode,
+            "all post of user fetched successfully",
+            PostInfo.toCollectionResponse(allPost.rows, allPost.count, query.page, query.limit))
+    );
+});

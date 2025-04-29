@@ -1,8 +1,7 @@
-import { NextFunction, Response } from "express";
 import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
 import JWTService from "../services/JWT.service";
+import CustomError from "../utils/CustomError.utils";
 import wrapRequestFunction from "../utils/wrapRequestFunction.utils";
-
 
 export const authTokenMW = wrapRequestFunction(async (req: AuthenticatedRequest, res, next) => {
 
@@ -16,6 +15,16 @@ export const authTokenMW = wrapRequestFunction(async (req: AuthenticatedRequest,
     };
     req.sessionId = userInfo.jti!;
 
+    // this part handles the request that has :uname parameter
+    const username = req.params?.uname
+    if (username) {
+
+        if (!username.startsWith("@"))
+            throw new CustomError(404, "route not found");
+
+        if (userInfo.sub !== username.split("@")[1])
+            throw new CustomError(404, "user not found");
+    }
 
     next();
 });

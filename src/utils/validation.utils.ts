@@ -5,13 +5,13 @@ import CustomError from "./CustomError.utils";
 export function validateName(name: string): void {
     const nameRegex = /^[A-Za-z]{2,50}$/; // Allows only letters, between 2 to 50 characters
     if (!name || !nameRegex.test(name))
-        throw new CustomError(400, 'Please Enter Valid Name!');
+        throw new CustomError(400, 'invalid name!');
 }
 
 export function validateEmail(email: string): void {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Standard email format validation
     if (!email || !emailRegex.test(email))
-        throw new CustomError(400, 'Please Enter Valid Email!');
+        throw new CustomError(400, 'invalid email!');
 }
 
 

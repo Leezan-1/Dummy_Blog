@@ -7,6 +7,7 @@ import cookieparser from 'cookie-parser';
 import authRouter from './routes/auth.route';
 import tagsRouter from './routes/tags.route';
 import postRouter from './routes/posts.route';
+import userRouter from './routes/user.route';
 
 // middlewares
 import route404MW from './middlewares/route404.middleware';
@@ -27,7 +28,7 @@ app.use("/public", express.static(publicDir));
 app.use("/v1/api/auth", authRouter);
 app.use("/v1/api/tags", tagsRouter);
 app.use("/v1/api/posts", postRouter);
-// app.use("v1/api/users");
+app.use("/v1/api/users", userRouter);
 
 // 404 PAGE
 app.use(route404MW);

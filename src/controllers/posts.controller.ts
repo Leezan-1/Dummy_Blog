@@ -6,7 +6,7 @@ import { apiSuccessMsg } from "../utils/apiMessage.utils";
 
 // utility functions
 import wrapRequestFunction from "../utils/wrapRequestFunction.utils";
-import { QueryOpt } from "../interfaces/QueryOptions.interface";
+import { imageFile, QueryOpt } from "../interfaces/QueryOptions.interface";
 
 // controller implemented
 
@@ -47,12 +47,29 @@ export const getSinglePostCTLR = wrapRequestFunction(async (req, res) => {
 export const createNewPostCTLR = wrapRequestFunction(async (req: AuthenticatedRequest, res) => {
 
     const userId = req.user?.id!;
+    const blogImages = (req.files as { [field: string]: Express.Multer.File[] })
+        ?.['blog-images']
+        ?.map((file) => ({
+            orgName: file.originalname,
+            name: file.filename,
+            mimetype: file.mimetype,
+            path: file.path
+        } as imageFile));
 
-    const newPost = await PostService.createNewPost(userId, req.body, req.files as { [field: string]: Express.Multer.File[] });
+    const thumbnailImg = (req.files as { [field: string]: Express.Multer.File[] })
+        ?.["thumbnailImage"]
+        ?.map((file) => ({
+            orgName: file.originalname,
+            name: file.filename,
+            mimetype: file.mimetype,
+            path: file.path
+        } as imageFile));
+
+    const newPost = await PostService.createNewPost(userId, req.body, thumbnailImg, blogImages);
 
     // response
     const resCode = 201;
-    const resMsg = apiSuccessMsg(resCode, "new posts created successfully", newPost);
+    const resMsg = apiSuccessMsg(resCode, "new posts created successfully");
     res.status(resCode).json(resMsg);
 });
 

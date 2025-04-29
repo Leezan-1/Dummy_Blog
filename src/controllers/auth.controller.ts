@@ -49,7 +49,7 @@ export const logoutUserCTLR = wrapRequestFunction(async (req: AuthenticatedReque
     res.status(responseCode).json(responseMsg,);
 });
 
-export const generateRefreshCTLR = wrapRequestFunction(async (req, res) => {
+export const generateRefreshCTLR = wrapRequestFunction(async (req: AuthenticatedRequest, res) => {
 
     // gets the refresh token cookie from the user's request
     let prevRefreshToken = req.signedCookies['refresh-token'];

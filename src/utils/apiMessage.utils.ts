@@ -15,7 +15,7 @@ export const apiFailureMsg: ApiResponseFn = (statusCode, msg = null, error?) => 
     return {
         code: statusCode,
         status: getReasonPhrase(statusCode),
-        success: true,
+        success: false,
         message: msg!,
         error: error!
     }

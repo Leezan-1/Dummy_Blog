@@ -1,8 +1,9 @@
 // this service handles login authentication and authorization
-import { LoginForm, SignUpForm } from "../interfaces/UserForm.interface";
+
+//import schema
+import { LoginForm, LoginFormSchema, SignUpForm, SignUpFormSchema } from "../schemas/userForm.schema";
 
 // utils functions
-import { validateEmail, validateName, validatePswd } from "../utils/validation.utils";
 import CustomError from "../utils/CustomError.utils";
 import { checkUserPassword, generatePassword } from "../utils/generate.utils";
 
@@ -18,13 +19,16 @@ export class AuthService {
     }
 
     // signs up a new user
-    static async signUpUser(userFormInfo: Required<SignUpForm>) {
+    static async signUpUser(signupInfo: SignUpForm) {
 
-        let { fname, lname, email, password } = userFormInfo;
-        validateName(fname);
-        validateName(lname);
-        validateEmail(email);
-        validatePswd(password);
+        let parsedBody = SignUpFormSchema.safeParse(signupInfo);
+
+        if (!parsedBody.success) {
+            const errMsg = parsedBody.error.errors[0];
+            throw new CustomError(400, errMsg.message, errMsg);
+        }
+
+        let { fname, lname, email, password } = parsedBody.data;
 
         // checks if there is any other user with same email address.
         const userExists = await this.getUserByEmail(email);
@@ -47,14 +51,22 @@ export class AuthService {
         });
     }
 
-    static async loginUser(userFormInfo: Required<LoginForm>) {
+    static async loginUser(loginInfo: LoginForm) {
 
-        let { email, password } = userFormInfo;
-        validateEmail(email);
-        validatePswd(password);
+        const parsedBody = LoginFormSchema.safeParse(loginInfo);
+
+        if (!parsedBody.success) {
+            const errMsg = parsedBody.error.errors[0].message;
+
+            //ERRORFIX make errors obj more user friendly
+            throw new CustomError(400, errMsg, parsedBody.error.errors);
+        }
+
+        let { email, password } = parsedBody.data;
 
         // checks the email and password of the user in database
-        let existingUser = await this.getUserByEmail(userFormInfo.email);
+        let existingUser = await this.getUserByEmail(email);
+
         if (!existingUser || ! await checkUserPassword(password, existingUser.password))
             throw new CustomError(403, "email or password did not match");
 

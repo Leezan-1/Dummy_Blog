@@ -15,8 +15,9 @@ import CustomError from "../utils/CustomError.utils";
 import { validatePostExcerpt, validatePostTitle, validateTags } from "../utils/validation.utils";
 import deleteImageFile from "../utils/deleteImageFile.utils";
 import { generateSlug } from "../utils/generate.utils";
-import { QueryOpt } from "../interfaces/QueryOptions.interface";
+import { imageFile, QueryOpt } from "../interfaces/QueryOptions.interface";
 import { PostScope } from "../interfaces/WhereClause.interface";
+import { PostFormSchema } from "../schemas/postFrom.schema";
 
 export class PostService {
 
@@ -59,13 +60,12 @@ export class PostService {
         return post;
     }
 
-    static async createNewPost(userId: number, postFormData: PostFrom, postImages?: { [field: string]: Express.Multer.File[] }) {
+    static async createNewPost(userId: number, postFormData: PostFrom, thumbnailImg: imageFile[], blogImages: imageFile[]) {
 
         const { title, excerpt, tags, description } = postFormData;
         let toAddTags: Tag | Tag[] | null;
 
-        validatePostTitle(title);
-        validatePostExcerpt(excerpt);
+        const parsedBody = PostFormSchema.parse(postFormData);
         // VALIDATE description
 
         // generate slug from post title
@@ -77,29 +77,24 @@ export class PostService {
             }
         }
 
-        let postSlug = await generateSlug(title);
-
-        let thumbnailImg = postImages?.["thumbnail-image"]?.[0];
-        let blogImages = postImages?.["blog-images"];
-        if (!thumbnailImg)
-            thumbnailImg = blogImages?.[0];
-
+        if (!thumbnailImg?.length)
+            thumbnailImg?.push(blogImages?.[0]);
 
         const post = await Post.create({
             title: title,
-            slug: postSlug,
+            slug: await generateSlug(title),
             excerpt: excerpt,
             description: description,
-            thumbnail: thumbnailImg?.filename,
-            thumbnail_path: thumbnailImg?.path,
+            thumbnail: thumbnailImg?.[0].name,
+            thumbnail_path: thumbnailImg?.[0].path,
             user_id: userId
         });
 
-        if (blogImages) {
-            let imageFiles = blogImages?.map((image) => ({
+        if (blogImages.length) {
+            let imageFiles = blogImages.map((image) => ({
                 post_id: post.id,
-                img_name: image?.filename,
-                path: image?.path
+                img_name: image.name,
+                path: image.path
             }));
             await Post_Images.bulkCreate(imageFiles);
         }

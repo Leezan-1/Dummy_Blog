@@ -24,6 +24,8 @@ The blog web application is a RESTful API (till now), that allows users to:
 ## Features
     User Authentication: Users can register, log in, and log out.
 
+    Forgot Password: User can reapply for new password.
+
     Blog Management: Authenticated users can create, read, update, and delete blog posts.
 
     Pagination: Blog posts are paginated for better performance.
