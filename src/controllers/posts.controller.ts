@@ -6,7 +6,7 @@ import { apiSuccessMsg } from "../utils/apiMessage.utils";
 
 // utility functions
 import wrapRequestFunction from "../utils/wrapRequestFunction.utils";
-import { imageFile, QueryOpt } from "../interfaces/QueryOptions.interface";
+import { ImageFile, QueryOpt } from "../interfaces/QueryOptions.interface";
 
 // controller implemented
 
@@ -54,7 +54,7 @@ export const createNewPostCTLR = wrapRequestFunction(async (req: AuthenticatedRe
             name: file.filename,
             mimetype: file.mimetype,
             path: file.path
-        } as imageFile));
+        } as ImageFile));
 
     const thumbnailImg = (req.files as { [field: string]: Express.Multer.File[] })
         ?.["thumbnailImage"]
@@ -63,7 +63,7 @@ export const createNewPostCTLR = wrapRequestFunction(async (req: AuthenticatedRe
             name: file.filename,
             mimetype: file.mimetype,
             path: file.path
-        } as imageFile));
+        } as ImageFile));
 
     const newPost = await PostService.createNewPost(userId, req.body, thumbnailImg, blogImages);
 

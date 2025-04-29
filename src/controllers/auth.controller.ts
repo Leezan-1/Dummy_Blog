@@ -61,3 +61,12 @@ export const generateRefreshCTLR = wrapRequestFunction(async (req: Authenticated
     const responseMsg = apiSuccessMsg(responseCode, "new tokens pair generated", { access_token: newToken.access_token });
     res.status(responseCode).cookie('refresh-token', newToken.refresh_token, COOKIE_OPTIONS).json(responseMsg);
 });
+
+export const regeneratePasswordCTLR = wrapRequestFunction(async (req, res) => {
+
+
+
+    // response
+    res.status(200)
+        .redirect('/');
+})

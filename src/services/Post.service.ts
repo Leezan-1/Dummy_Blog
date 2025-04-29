@@ -15,7 +15,7 @@ import CustomError from "../utils/CustomError.utils";
 import { validatePostExcerpt, validatePostTitle, validateTags } from "../utils/validation.utils";
 import deleteImageFile from "../utils/deleteImageFile.utils";
 import { generateSlug } from "../utils/generate.utils";
-import { imageFile, QueryOpt } from "../interfaces/QueryOptions.interface";
+import { ImageFile, QueryOpt } from "../interfaces/QueryOptions.interface";
 import { PostScope } from "../interfaces/WhereClause.interface";
 import { PostFormSchema } from "../schemas/postFrom.schema";
 
@@ -60,12 +60,17 @@ export class PostService {
         return post;
     }
 
-    static async createNewPost(userId: number, postFormData: PostFrom, thumbnailImg: imageFile[], blogImages: imageFile[]) {
+    static async createNewPost(userId: number, postFormData: PostFrom, thumbnailImg: ImageFile[], blogImages: ImageFile[]) {
+
+        const parsedBody = PostFormSchema.safeParse(postFormData);
+
+        if (!parsedBody.success) {
+            const errMsg = parsedBody.error.errors;
+            throw new CustomError(400, 'invalid form input', errMsg)
+        }
 
         const { title, excerpt, tags, description } = postFormData;
         let toAddTags: Tag | Tag[] | null;
-
-        const parsedBody = PostFormSchema.parse(postFormData);
         // VALIDATE description
 
         // generate slug from post title
@@ -77,10 +82,10 @@ export class PostService {
             }
         }
 
-        if (!thumbnailImg?.length)
+        if (!thumbnailImg?.length && blogImages?.length)
             thumbnailImg?.push(blogImages?.[0]);
 
-        const post = await Post.create({
+        const post = await Post.build({
             title: title,
             slug: await generateSlug(title),
             excerpt: excerpt,

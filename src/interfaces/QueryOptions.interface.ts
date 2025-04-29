@@ -5,7 +5,7 @@ export interface QueryOpt {
     tags?: string | string[]
 };
 
-export interface imageFile {
+export interface ImageFile {
     orgName: string,
     name: string,
     mimetype: string,

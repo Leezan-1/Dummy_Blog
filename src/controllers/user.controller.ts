@@ -5,7 +5,7 @@ import { apiSuccessMsg } from "../utils/apiMessage.utils";
 import wrapRequestFunction from "../utils/wrapRequestFunction.utils";
 
 
-export const getUserPosts = wrapRequestFunction(async (req: AuthenticatedRequest, res) => {
+export const getUserPostsCTLR = wrapRequestFunction(async (req: AuthenticatedRequest, res) => {
 
 
     const query = {
