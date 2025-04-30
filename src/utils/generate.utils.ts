@@ -61,3 +61,8 @@ export function generateDuration(createdAt: string) {
     console.log('postDuration :>> ', postDuration);
     return postDuration;
 }
+
+export function generateOTPToken() {
+
+    return Math.floor(100000 + 900000 * Math.random());
+}

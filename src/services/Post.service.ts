@@ -12,7 +12,6 @@ import TagService from "./Tag.service";
 
 // utility function
 import CustomError from "../utils/CustomError.utils";
-import { validatePostExcerpt, validatePostTitle, validateTags } from "../utils/validation.utils";
 import deleteImageFile from "../utils/deleteImageFile.utils";
 import { generateSlug } from "../utils/generate.utils";
 import { ImageFile, QueryOpt } from "../interfaces/QueryOptions.interface";
@@ -65,17 +64,18 @@ export class PostService {
         const parsedBody = PostFormSchema.safeParse(postFormData);
 
         if (!parsedBody.success) {
-            const errMsg = parsedBody.error.errors;
-            throw new CustomError(400, 'invalid form input', errMsg)
+            const errObj = parsedBody.error.errors;
+
+
+            throw new CustomError(400, '', errObj);
         }
 
-        const { title, excerpt, tags, description } = postFormData;
+        const { title, excerpt, tags } = parsedBody.data;
         let toAddTags: Tag | Tag[] | null;
         // VALIDATE description
 
         // generate slug from post title
         if (tags) {
-            validateTags(tags)
             toAddTags = await TagService.checkTagsExist(tags);
             if (!toAddTags) {
                 throw new CustomError(404, "given tag or tags not found");
@@ -85,12 +85,12 @@ export class PostService {
         if (!thumbnailImg?.length && blogImages?.length)
             thumbnailImg?.push(blogImages?.[0]);
 
-        const post = await Post.build({
+        const post = await Post.create({
             title: title,
             slug: await generateSlug(title),
             excerpt: excerpt,
-            description: description,
-            thumbnail: thumbnailImg?.[0].name,
+            description: postFormData.description,
+            thumbnail: thumbnailImg?.[0].filename,
             thumbnail_path: thumbnailImg?.[0].path,
             user_id: userId
         });
@@ -98,7 +98,7 @@ export class PostService {
         if (blogImages.length) {
             let imageFiles = blogImages.map((image) => ({
                 post_id: post.id,
-                img_name: image.name,
+                img_name: image.filename,
                 path: image.path
             }));
             await Post_Images.bulkCreate(imageFiles);
@@ -108,28 +108,29 @@ export class PostService {
         return post;
     }
 
-    static async updatePost(userId: number, postInfo: Post, postFormData: PostFrom, postImages?: { [field: string]: Express.Multer.File[] }) {
+    static async updatePost(userId: number, postInfo: Post, postFormData: PostFrom, thumbnailImg: ImageFile | null, blogImages: ImageFile[]) {
+
         if (userId != postInfo.user_id)
             throw new CustomError(401, "invalid user trying to update post");
 
         let toSetTags: Tag | Tag[] | null = null;
 
+        const parsedBody = PostFormSchema.safeParse(postFormData);
+        if (!parsedBody.success) {
+            const errObj = parsedBody.error.errors;
+            throw new CustomError(400, "invalid user form entry", errObj);
+        }
         // validate form data
-        const { title, excerpt, tags, description } = postFormData;
-        validatePostTitle(title);
-        validatePostExcerpt(excerpt);
+        const { title, excerpt, tags } = parsedBody.data;
 
         if (tags) {
-            validateTags(tags)
             toSetTags = await TagService.checkTagsExist(tags);
             if (!toSetTags)
                 throw new CustomError(404, "given tag or tags not found")
         }
 
 
-        let thumbnailImg = postImages?.["thumbnail-image"]?.[0];
-        let blogImages = postImages?.["blog-images"];
-        if (!thumbnailImg && !postInfo.thumbnail_path)
+        if (!thumbnailImg && !postInfo.thumbnail_path && blogImages.length)
             thumbnailImg = blogImages?.[0];
 
         // previous thumbnail image
@@ -141,7 +142,7 @@ export class PostService {
             excerpt: excerpt,
             thumbnail: thumbnailImg?.filename,
             thumbnail_path: thumbnailImg?.path,
-            description: description,
+            description: postFormData.description,
         });
 
         await updated.$set("tags", toSetTags!);
@@ -168,13 +169,12 @@ export class PostService {
         }
 
         if (blogImages) {
-            let imageFiles = blogImages?.map((image) => ({
+
+            await Post_Images.bulkCreate(blogImages?.map((image) => ({
                 post_id: postInfo.id,
                 img_name: image.filename,
                 path: image.path
-            }));
-
-            await Post_Images.bulkCreate(imageFiles);
+            })));
         }
 
     }

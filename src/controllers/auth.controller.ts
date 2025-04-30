@@ -62,11 +62,36 @@ export const generateRefreshCTLR = wrapRequestFunction(async (req: Authenticated
     res.status(responseCode).cookie('refresh-token', newToken.refresh_token, COOKIE_OPTIONS).json(responseMsg);
 });
 
-export const regeneratePasswordCTLR = wrapRequestFunction(async (req, res) => {
+export const resetPasswordCTLR = wrapRequestFunction(async (req, res) => {
 
+    let email = req.body?.email;
 
+    await AuthService.sendOtpToken(email);
 
     // response
-    res.status(200)
-        .redirect('/');
-})
+    const responseCode = 200;
+    const responseMsg = apiSuccessMsg(responseCode, 'token successfully sent to given email');
+    res.status(responseCode).json(responseMsg);
+});
+
+export const validateOtpCTLR = wrapRequestFunction(async (req, res) => {
+
+    let email = req.body?.email;
+    let token = req.body?.otpToken;
+
+    await AuthService.checkOtpToken(email, token);
+
+    // response 
+    const responseCode = 200;
+    const responseMsg = apiSuccessMsg(responseCode, 'token is valid, checked successfully');
+    res.status(responseCode).json(responseMsg);
+});
+
+export const regeneratePasswordCTLR = wrapRequestFunction(async (req, res) => {
+
+    await AuthService.newPassword(req.body);
+
+    // response
+    const responseCode = 201;
+    res.status(responseCode).json(apiSuccessMsg(responseCode, 'new password created'));
+});

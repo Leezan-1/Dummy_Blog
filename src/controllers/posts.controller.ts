@@ -51,7 +51,7 @@ export const createNewPostCTLR = wrapRequestFunction(async (req: AuthenticatedRe
         ?.['blog-images']
         ?.map((file) => ({
             orgName: file.originalname,
-            name: file.filename,
+            filename: file.filename,
             mimetype: file.mimetype,
             path: file.path
         } as ImageFile));
@@ -60,7 +60,7 @@ export const createNewPostCTLR = wrapRequestFunction(async (req: AuthenticatedRe
         ?.["thumbnailImage"]
         ?.map((file) => ({
             orgName: file.originalname,
-            name: file.filename,
+            filename: file.filename,
             mimetype: file.mimetype,
             path: file.path
         } as ImageFile));
@@ -77,12 +77,30 @@ export const createNewPostCTLR = wrapRequestFunction(async (req: AuthenticatedRe
 export const updatePostCTLR = wrapRequestFunction(async (req: AuthenticatedRequest, res) => {
 
     const userId = req.user?.id!;
-
     const postId = Number(req.params?.postId!);
 
-    const postInfo = await PostService.getSinglePost(postId);
+    const blogImages = (req.files as { [field: string]: Express.Multer.File[] })
+        ?.['blog-images']
+        ?.map((file) => ({
+            orgName: file.originalname,
+            filename: file.filename,
+            mimetype: file.mimetype,
+            path: file.path
+        } as ImageFile));
 
-    await PostService.updatePost(userId, postInfo, req.body, req.files as { [field: string]: Express.Multer.File[] });
+    const thmbFile = (req.files as { [field: string]: Express.Multer.File[] })?.["thumbnailImage"]?.[0];
+    let thumbnailImg: ImageFile | null = null;
+    if (thmbFile) {
+        thumbnailImg = {
+            orgName: thmbFile.originalname,
+            filename: thmbFile.filename,
+            mimetype: thmbFile.mimetype,
+            path: thmbFile.path
+        } as ImageFile;
+    }
+
+    const postInfo = await PostService.getSinglePost(postId);
+    await PostService.updatePost(userId, postInfo, req.body, thumbnailImg, blogImages);
 
     // response
     const resCode = 200;
@@ -105,6 +123,7 @@ export const deletePostCTLR = wrapRequestFunction(async (req: AuthenticatedReque
     res.status(resCode).json(resMsg);
 });
 
+// updates post's featured flag
 export const updateFeatureFlagCTLR = wrapRequestFunction(async (req: AuthenticatedRequest, res) => {
     const postId = Number(req.params?.postId!);
 

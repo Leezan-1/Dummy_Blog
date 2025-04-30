@@ -7,7 +7,7 @@ export interface QueryOpt {
 
 export interface ImageFile {
     orgName: string,
-    name: string,
+    filename: string,
     mimetype: string,
     path: string,
 }
