@@ -2,12 +2,18 @@ import { ZodError } from "zod";
 
 export default class CustomError extends Error {
     code: number;
-    errObj: object | ZodError
+    errorObj: object;
 
-    constructor(statusCode: number, message: string, err?: object | ZodError) {
+    constructor(statusCode: number, message: string, error?: ZodError) {
         super(message)
         this.code = statusCode;
 
-        this.errObj = err!
+        if (error instanceof ZodError) {
+            this.errorObj = error.errors.map((err) => ({
+                field: err.path[0],
+                message: err.message
+            }));
+        }
+        this.errorObj = error!
     }
 }

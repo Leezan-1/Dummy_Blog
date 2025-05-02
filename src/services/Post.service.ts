@@ -67,7 +67,7 @@ export class PostService {
             const errObj = parsedBody.error.errors;
 
 
-            throw new CustomError(400, '', errObj);
+            throw new CustomError(400, '');
         }
 
         const { title, excerpt, tags } = parsedBody.data;
@@ -118,7 +118,7 @@ export class PostService {
         const parsedBody = PostFormSchema.safeParse(postFormData);
         if (!parsedBody.success) {
             const errObj = parsedBody.error.errors;
-            throw new CustomError(400, "invalid user form entry", errObj);
+            throw new CustomError(400, "invalid user form entry");
         }
         // validate form data
         const { title, excerpt, tags } = parsedBody.data;

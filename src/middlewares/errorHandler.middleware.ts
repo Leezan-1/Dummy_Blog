@@ -8,10 +8,11 @@ import { NextFunction, Request, Response } from 'express';
 import { apiFailureMsg } from '../utils/apiMessage.utils';
 import CustomError from '../utils/CustomError.utils';
 import deleteImageFile from '../utils/deleteImageFile.utils';
+import { ZodError } from 'zod';
 
 
 const errorHandlerMW = async (error: Error, req: Request, res: Response, next: NextFunction) => {
-    let responseCode: number = 500, errMsg: string = "server error";
+    let responseCode: number = 500, errMsg: string = "server error", errObj: unknown | undefined;
 
 
     if (req.files && typeof req.files === 'object') {
@@ -29,20 +30,28 @@ const errorHandlerMW = async (error: Error, req: Request, res: Response, next: N
     }
 
     // handles different types of error
-    if (error instanceof CustomError)
+    if (error instanceof CustomError) {
         responseCode = error.code, errMsg = error.message;
+    }
 
-    else if (error instanceof MulterError)
+    else if (error instanceof ZodError) {
+        responseCode = 400, errMsg = "validation error";
+        errObj = error.flatten().fieldErrors;
+    }
+
+    else if (error instanceof MulterError) {
         responseCode = 406, errMsg = "multer error";
+    }
 
-    else if (error instanceof JsonWebTokenError)
+    else if (error instanceof JsonWebTokenError) {
         responseCode = 400, errMsg = "token error";
+    }
 
     else if (error instanceof BaseError)
         errMsg = "database error";
 
-    console.log(errMsg, ":\n", error);
-    res.status(responseCode).json(apiFailureMsg(responseCode, errMsg, error));
+    console.log("\n", errMsg, ":\n", error);
+    res.status(responseCode).json(apiFailureMsg(responseCode, errMsg, errObj || error));
 };
 
 export default errorHandlerMW;

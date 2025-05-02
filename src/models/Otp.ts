@@ -3,7 +3,7 @@ import { Model, Table, Column, DataType, ForeignKey, BelongsTo, Scopes } from 's
 @Table({
     modelName: "Otp",
     tableName: "otp",
-    updatedAt: false,
+    timestamps: false,
 })
 export class Otp extends Model {
     @Column({
@@ -23,4 +23,7 @@ export class Otp extends Model {
         type: DataType.INTEGER,
     })
     token!: string;
+
+    @Column(DataType.BIGINT)
+    expiry!: bigint;
 }

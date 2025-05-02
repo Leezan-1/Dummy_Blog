@@ -8,5 +8,5 @@ export interface ResponseMessage {
 }
 
 export default interface ApiResponseFn {
-    (statusCode: number, message: string | null, dataOrError?: object | undefined): ResponseMessage
+    (statusCode: number, message: string | null, dataOrError?: unknown | undefined): ResponseMessage
 }

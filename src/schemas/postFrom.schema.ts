@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-const titleRegex = /^[A-Za-z0-9\s\.,!?'"-]+$/;
-const tagNameRegex = /^[A-Za-z]$/;
+const titleRegex = /^[A-Za-z0-9\s\.,! ?'"-]*$/;
+const tagNameRegex = /^[A-Za-z]+$/;
 
 const TitleSchema = z.string().min(10, 'must be at least 10 character long').max(100, "must not exceed 100 character").regex(titleRegex, "no emojis or special character allowed");
 const ExcerptSchema = z.string().min(10, "excerpt must at least be 10 character long ");
