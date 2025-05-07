@@ -1,6 +1,11 @@
+// models and services
 import { Post } from "../models/Post";
+// utility functions & classes
 import { generateDuration, generateImageURL } from "../utils/generate.utils";
-import { pagination } from "../utils/pagination";
+import { pagination } from "../utils/pagination.utils";
+
+// controllers 
+// middlewares
 
 export class PostInfo {
 

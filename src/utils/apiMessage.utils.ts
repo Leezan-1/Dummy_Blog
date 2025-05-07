@@ -1,5 +1,9 @@
-import ApiResponseFn from "../interfaces/ResponseMessage.interface";
+// built-in & third party modules
 import { getReasonPhrase } from "http-status-codes";
+
+// schemas, interfaces & enums
+import ApiResponseFn from "../interfaces/ResponseMessage.interface";
+
 
 export const apiSuccessMsg: ApiResponseFn = (statusCode, msg = null, data?) => {
     return {

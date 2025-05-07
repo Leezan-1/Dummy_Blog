@@ -1,10 +1,19 @@
+// built-in & third party modules
 import path from 'path';
 import crypto from 'crypto';
-import CustomError from '../utils/CustomError.utils';
-import { Request } from 'express';
-import multer, { FileFilterCallback } from 'multer';
+import multer from 'multer';
 
-const imageFileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+// schemas, interfaces & enums
+import { Request } from 'express';
+
+// models and services
+// utility functions & classes
+import CustomError from '../utils/CustomError.utils';
+
+// controllers 
+// middlewares
+
+const imageFileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
 
     if (allowedTypes.includes(file.mimetype))

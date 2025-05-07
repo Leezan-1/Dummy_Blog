@@ -1,4 +1,7 @@
+
+// models and services
 import { Tag } from "../models/Tag";
+
 
 export class TagsInfo {
     static sendAllTags(tags: Tag[]) {

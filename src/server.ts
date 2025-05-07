@@ -1,8 +1,13 @@
-import { config } from "dotenv";
-config();
-
+// built-in & third party modules
+// configs and resources
 import app from "./app";
+import { config } from "dotenv";
+
+// models and services
 import db from './models';
+
+
+config();
 
 const startServer = async () => {
     try {

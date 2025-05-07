@@ -3,7 +3,7 @@
 // schemas, interfaces & enums
 import { CookieOptions } from "express";
 import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
-import { EmailSchema, LoginFormSchema, SignUpFormSchema } from "../schemas/userForm.schema";
+import { LoginFormSchema, SignUpFormSchema } from "../schemas/userForm.schema";
 
 // models and services
 import AuthService from "../services/Auth.service";

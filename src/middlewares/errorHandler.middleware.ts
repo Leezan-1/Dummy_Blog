@@ -1,14 +1,16 @@
-// in-built modules
-import { MulterError } from 'multer';
-import { BaseError } from 'sequelize';
-import { JsonWebTokenError } from 'jsonwebtoken';
+// schemas, interfaces & enums
 import { NextFunction, Request, Response } from 'express';
 
-// utils modules
-import { apiFailureMsg } from '../utils/apiMessage.utils';
-import CustomError from '../utils/CustomError.utils';
-import deleteImageFile from '../utils/deleteImageFile.utils';
+// Errors classes and types
+import { BaseError } from 'sequelize';
+import { MulterError } from 'multer';
+import { JsonWebTokenError } from 'jsonwebtoken';
 import { ZodError } from 'zod';
+import CustomError from '../utils/CustomError.utils';
+
+// utility functions & classes
+import { apiFailureMsg } from '../utils/apiMessage.utils';
+import deleteImageFile from '../utils/deleteImageFile.utils';
 
 
 const errorHandlerMW = async (error: Error, req: Request, res: Response, next: NextFunction) => {

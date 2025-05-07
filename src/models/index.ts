@@ -1,8 +1,12 @@
+// built-in & third party modules
+import fs from 'fs';
+import path from 'path';
+import { Sequelize } from 'sequelize-typescript';
+
+// configs and resources
 import config from '../config/config.json';
 
-import { Sequelize } from 'sequelize-typescript';
-import path from 'path';
-import fs from 'fs';
+// models and services
 import { Post } from './Post';
 import { User } from './User';
 import { Post_Images } from './Post_Images';
@@ -11,6 +15,7 @@ import { Tag } from './Tag';
 import { Profile } from './Profile';
 import { Token } from './Token';
 import { Otp } from './Otp';
+
 
 const env: string = (process.env.NODE_ENV as string) || "development";
 const dbConfig = (config as any)[env];

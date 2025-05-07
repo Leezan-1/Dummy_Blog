@@ -1,5 +1,9 @@
+// built-in & third party modules
 import express from "express";
+
+// controllers 
 import { createNewTagCTLR, deleteTagCTLR, getAllTagsCTLR, updateTagCTLR } from "../controllers/tags.controller";
+// middlewares
 import { authTokenMW } from "../middlewares/authToken.middleware";
 
 const router = express.Router();

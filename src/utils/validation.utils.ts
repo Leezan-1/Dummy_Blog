@@ -1,4 +1,5 @@
-// export function validateName
+
+// utility functions & classes
 import CustomError from "./CustomError.utils";
 
 // validates user's name

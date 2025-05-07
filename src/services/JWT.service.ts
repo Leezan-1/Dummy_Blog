@@ -1,9 +1,20 @@
+// built-in & third party modules
 import { v4 } from "uuid";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+
+// configs and resources
+import { config } from 'dotenv';
+
+// schemas, interfaces & enums
+import { JwtPayload } from "jsonwebtoken";
+
+// models and services
 import { Token } from "../models/Token";
+
+// utility functions & classes
 import CustomError from "../utils/CustomError.utils";
 
-import { config } from 'dotenv';
+
 config();
 
 const ACCESS_TOKEN_EXPIRY = "6h",

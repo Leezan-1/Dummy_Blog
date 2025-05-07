@@ -1,3 +1,5 @@
+// built-in & third party modules
+
 import fs from 'fs';
 
 export default async function deleteImageFile(filePath: string) {

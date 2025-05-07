@@ -1,7 +1,11 @@
+// built-in & third party modules
 import express from 'express';
 
-import { authTokenMW } from '../middlewares/authToken.middleware';
+// controllers 
 import { getUserPostsCTLR } from '../controllers/user.controller';
+// middlewares
+import { authTokenMW } from '../middlewares/authToken.middleware';
+
 
 const router = express.Router();
 

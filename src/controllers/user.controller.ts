@@ -1,12 +1,19 @@
-import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
+// built-in & third party modules
+// configs and resources
 import { PostInfo } from "../resources/PostInfo";
+
+// schemas, interfaces & enums
+import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
+
+// models and services
 import { PostService } from "../services/Post.service";
+
+// utility functions & classes
 import { apiSuccessMsg } from "../utils/apiMessage.utils";
 import wrapRequestFunction from "../utils/wrapRequestFunction.utils";
 
 
 export const getUserPostsCTLR = wrapRequestFunction(async (req: AuthenticatedRequest, res) => {
-
 
     const query = {
         page: Number(req.query?.page) || 1,

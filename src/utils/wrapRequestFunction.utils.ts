@@ -1,3 +1,4 @@
+// schemas, interfaces & enums
 import { NextFunction, Request, Response } from "express";
 import { FunctionWrapper } from "../interfaces/FunctionWrapper.interface";
 import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";

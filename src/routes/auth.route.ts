@@ -1,8 +1,13 @@
+// built-in & third party modules
 import express from 'express';
-const router = express.Router();
 
+// controllers 
 import { signUpCTLR, loginUserCTLR, logoutUserCTLR, generateRefreshCTLR } from '../controllers/auth.controller';
+// middlewares
 import { authTokenMW } from '../middlewares/authToken.middleware';
+
+
+const router = express.Router();
 
 // handles 'auth/signup' route. 
 router.route('/signup').post(signUpCTLR);

@@ -1,3 +1,4 @@
+// built-in & third party modules
 import { SendMailOptions } from "nodemailer";
 
 export const makeOtpMail = (email: string, otpToken: number) => {

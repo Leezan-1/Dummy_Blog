@@ -1,3 +1,4 @@
+// configs and resources
 import { uploadPostImage, uploadUserImage } from "../config/multer.config";
 
 export const uploadPostImagesMW = uploadPostImage.fields([

@@ -1,7 +1,13 @@
+// built-in & third party modules
 import express from 'express';
+
+// controllers 
 import { createNewPostCTLR, deletePostCTLR, getAllPostsCTLR, getSinglePostCTLR, updateFeatureFlagCTLR, updatePostCTLR } from '../controllers/posts.controller';
+
+// middlewares
 import { authTokenMW } from '../middlewares/authToken.middleware';
 import { uploadPostImagesMW } from '../middlewares/multer.middleware';
+
 
 const router = express.Router();
 

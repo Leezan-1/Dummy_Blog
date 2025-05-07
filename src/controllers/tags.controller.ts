@@ -1,8 +1,17 @@
-import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
+// built-in & third party modules
+// configs and resources
 import { TagsInfo } from "../resources/TagsInfo";
+
+// schemas, interfaces & enums
+import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
+
+// models and services
 import TagService from "../services/Tag.service";
-import { apiSuccessMsg } from "../utils/apiMessage.utils";
+
+// utility functions & classes
 import wrapRequestFunction from "../utils/wrapRequestFunction.utils";
+import { apiSuccessMsg } from "../utils/apiMessage.utils";
+
 
 export const getAllTagsCTLR = wrapRequestFunction(async (req, res) => {
 

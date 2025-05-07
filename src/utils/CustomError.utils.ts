@@ -1,3 +1,4 @@
+// configs and resources
 import { ZodError } from "zod";
 
 export default class CustomError extends Error {

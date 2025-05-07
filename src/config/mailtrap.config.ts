@@ -1,3 +1,4 @@
+// built-in & third party modules
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 

@@ -1,7 +1,11 @@
+// schemas, interfaces & enums
 import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
+// models and services
 import JWTService from "../services/JWT.service";
+// utility functions & classes
 import CustomError from "../utils/CustomError.utils";
 import wrapRequestFunction from "../utils/wrapRequestFunction.utils";
+
 
 export const authTokenMW = wrapRequestFunction(async (req: AuthenticatedRequest, res, next) => {
 

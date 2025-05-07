@@ -1,22 +1,22 @@
-// interfaces
-import PostFrom from "../interfaces/PostForm.interface";
+
+// schemas, interfaces & enums
 import { WhereOptions } from "sequelize";
-
-// models
-import { Post } from "../models/Post";
-import { Tag } from "../models/Tag";
-import { Post_Images } from "../models/Post_Images";
-
-// services
-import TagService from "./Tag.service";
-
-// utility function
-import CustomError from "../utils/CustomError.utils";
-import deleteImageFile from "../utils/deleteImageFile.utils";
-import { generateSlug } from "../utils/generate.utils";
+import PostFrom from "../interfaces/PostForm.interface";
 import { ImageFile, QueryOpt } from "../interfaces/QueryOptions.interface";
 import { PostScope } from "../interfaces/WhereClause.interface";
 import { PostFormSchema } from "../schemas/postFrom.schema";
+
+// models and services
+import { Post } from "../models/Post";
+import { Tag } from "../models/Tag";
+import { Post_Images } from "../models/Post_Images";
+import TagService from "./Tag.service";
+
+// utility functions & classes
+import CustomError from "../utils/CustomError.utils";
+import deleteImageFile from "../utils/deleteImageFile.utils";
+import { generateSlug } from "../utils/generate.utils";
+
 
 export class PostService {
 

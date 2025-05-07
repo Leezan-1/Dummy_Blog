@@ -1,14 +1,17 @@
-// interfaces
-import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
+// configs and resources
 import { PostInfo } from "../resources/PostInfo";
-import { PostService } from "../services/Post.service";
-import { apiSuccessMsg } from "../utils/apiMessage.utils";
 
-// utility functions
-import wrapRequestFunction from "../utils/wrapRequestFunction.utils";
+// schemas, interfaces & enums
+import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
 import { ImageFile, QueryOpt } from "../interfaces/QueryOptions.interface";
 
-// controller implemented
+// models and services
+import { PostService } from "../services/Post.service";
+
+// utility functions & classes
+import { apiSuccessMsg } from "../utils/apiMessage.utils";
+import wrapRequestFunction from "../utils/wrapRequestFunction.utils";
+
 
 // gets all posts with query may be
 export const getAllPostsCTLR = wrapRequestFunction(async (req, res) => {
