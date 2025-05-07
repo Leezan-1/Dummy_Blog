@@ -61,7 +61,7 @@ export default class JWTService {
         const newRefreshToken = jwt.sign(
             payload,
             process.env.REFRESH_TOKEN_SECRET!,
-            { expiresIn: REFRESH_TOKEN_EXPIRY }
+            { expiresIn: REFRESH_TOKEN_EXPIRY! }
         );
 
         // gets the expiry from token and adds it to token expiry 

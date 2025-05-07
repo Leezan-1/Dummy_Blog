@@ -1,17 +1,18 @@
-// built in modules
-import { CookieOptions } from "express";
+// built-in & third party modules
 
-// service module
-import { AuthService } from "../services/Auth.service";
+// schemas, interfaces & enums
+import { CookieOptions } from "express";
+import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
+import { EmailSchema, LoginFormSchema, SignUpFormSchema } from "../schemas/userForm.schema";
+
+// models and services
+import AuthService from "../services/Auth.service";
 import JWTService from "../services/JWT.service";
 
-// utils modules
+// utility functions & classes
 import { apiSuccessMsg } from "../utils/apiMessage.utils";
 import wrapRequestFunction from "../utils/wrapRequestFunction.utils";
 
-// interfaces and schemas
-import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
-import { EmailSchema, LoginFormSchema, SignUpFormSchema } from "../schemas/userForm.schema";
 
 const COOKIE_OPTIONS: CookieOptions = {
     signed: true,
@@ -74,3 +75,22 @@ export const generateRefreshCTLR = wrapRequestFunction(async (req: Authenticated
     res.status(responseCode).cookie('refresh-token', newToken.refresh_token, COOKIE_OPTIONS).json(responseMsg);
 });
 
+export const resetPasswordCTLR = wrapRequestFunction(async (req, res) => {
+
+    await AuthService.sendOtpToken(req.body?.email);
+
+    // response
+    const responseCode = 200;
+    const responseMsg = apiSuccessMsg(responseCode, 'token successfully sent to given email');
+    res.status(responseCode).json(responseMsg);
+});
+
+export const regeneratePasswordCTLR = wrapRequestFunction(async (req: AuthenticatedRequest, res) => {
+
+    // req.body should have email , otp token
+    await AuthService.resetPassword(req.body, req?.user?.id!);
+
+    // response
+    const responseCode = 201;
+    res.status(responseCode).json(apiSuccessMsg(responseCode, 'new password created'));
+});

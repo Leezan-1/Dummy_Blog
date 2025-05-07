@@ -2,6 +2,7 @@ import { Model, Table, Column, DataType, HasMany, HasOne, Scopes } from 'sequeli
 import { Token } from './Token';
 import { Post } from './Post';
 import { Profile } from './Profile';
+import { Otp } from './Otp';
 
 
 @Table({
@@ -60,13 +61,16 @@ export class User extends Model {
 
     // associations 1:1 Profile
     @HasOne(() => Profile)
-    profile!: Profile
+    profile!: Profile;
+
+    // @HasOne(() => Otp)
+    // otp!: Otp;
 
     // association 1:N Tokens
     @HasMany(() => Token)
-    tokens!: Token[]
+    tokens!: Token[];
 
     // associations 1:N Posts
     @HasMany(() => Post)
-    posts!: Post[]
+    posts!: Post[];
 }

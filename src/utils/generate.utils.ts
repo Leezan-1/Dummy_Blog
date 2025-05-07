@@ -63,6 +63,15 @@ export function generateDuration(createdAt: string) {
 }
 
 export function generateOTPToken() {
+    let randomOtp = crypto.randomInt(0, 1000).toString();
 
-    return Math.floor(100000 + 900000 * Math.random());
+    if (randomOtp.length < 6) {
+        let padSize = 6 - randomOtp.length;
+
+        let padOtp = crypto.randomInt(0, Math.pow(10, padSize)).toString();
+
+        return parseInt(padOtp + randomOtp);
+    }
+
+    return parseInt(randomOtp);
 }

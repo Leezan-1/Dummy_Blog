@@ -36,7 +36,7 @@ const errorHandlerMW = async (error: Error, req: Request, res: Response, next: N
 
     else if (error instanceof ZodError) {
         responseCode = 400, errMsg = "validation error";
-        errObj = error.flatten().fieldErrors;
+        console.log('errObj :>> ', error.flatten());
     }
 
     else if (error instanceof MulterError) {
