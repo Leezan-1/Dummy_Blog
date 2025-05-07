@@ -2,8 +2,17 @@
 import express from 'express';
 
 // controllers 
-import { signUpCTLR, loginUserCTLR, logoutUserCTLR, generateRefreshCTLR } from '../controllers/auth.controller';
+import {
+    signUpCTLR,
+    loginUserCTLR,
+    logoutUserCTLR,
+    resetPasswordCTLR,
+    generateRefreshCTLR,
+    regeneratePasswordCTLR
+} from '../controllers/auth.controller';
+
 // middlewares
+import { validateOtpMW } from '../middlewares/validateOtp.middleware';
 import { authTokenMW } from '../middlewares/authToken.middleware';
 
 
@@ -20,5 +29,10 @@ router.route('/logout').get(authTokenMW, logoutUserCTLR);
 
 // handles 'auth/refresh' route
 router.route('/refresh').get(generateRefreshCTLR);
+
+// routes
+router.route('/reset-password').post(resetPasswordCTLR);
+
+router.route('/new-password').post(validateOtpMW, regeneratePasswordCTLR);
 
 export default router;
