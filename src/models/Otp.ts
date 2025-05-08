@@ -1,6 +1,6 @@
 import { Model, Table, Column, DataType, ForeignKey, BelongsTo, Scopes, NotNull, HasOne } from 'sequelize-typescript';
 import { User } from './User';
-import { OtpPurpose } from '../enums/OtpPurpose.enum';
+import { OtpPurpose } from '../constants/enums';
 
 @Table({
     modelName: "Otp",

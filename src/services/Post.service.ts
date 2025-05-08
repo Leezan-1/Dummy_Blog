@@ -1,11 +1,10 @@
 
 // schemas, interfaces & enums
 import { WhereOptions } from "sequelize";
-import PostFrom from "../interfaces/PostForm.interface";
 import { ImageFile, QueryOpt } from "../interfaces/QueryOptions.interface";
 import { PostScope } from "../interfaces/WhereClause.interface";
-import { PostFormSchema } from "../schemas/postFrom.schema";
-
+import { PostFormSchema } from "../schemas/multipleFieldsForm.schema";
+import { PostForm } from "../interfaces/Forms.interface";
 // models and services
 import { Post } from "../models/Post";
 import { Tag } from "../models/Tag";
@@ -59,7 +58,7 @@ export class PostService {
         return post;
     }
 
-    static async createNewPost(userId: number, postFormData: PostFrom, thumbnailImg: ImageFile[], blogImages: ImageFile[]) {
+    static async createNewPost(userId: number, postFormData: PostForm, thumbnailImg: ImageFile[], blogImages: ImageFile[]) {
 
         const parsedBody = PostFormSchema.safeParse(postFormData);
 
@@ -108,7 +107,7 @@ export class PostService {
         return post;
     }
 
-    static async updatePost(userId: number, postInfo: Post, postFormData: PostFrom, thumbnailImg: ImageFile | null, blogImages: ImageFile[]) {
+    static async updatePost(userId: number, postInfo: Post, postFormData: PostForm, thumbnailImg: ImageFile | null, blogImages: ImageFile[]) {
 
         if (userId != postInfo.user_id)
             throw new CustomError(401, "invalid user trying to update post");

@@ -12,7 +12,7 @@ import {
 } from '../controllers/auth.controller';
 
 // middlewares
-import { validateOtpMW } from '../middlewares/validateOtp.middleware';
+import { verifyOtpMW } from '../middlewares/validateOtp.middleware';
 import { authTokenMW } from '../middlewares/authToken.middleware';
 
 
@@ -31,8 +31,9 @@ router.route('/logout').get(authTokenMW, logoutUserCTLR);
 router.route('/refresh').get(generateRefreshCTLR);
 
 // routes
-router.route('/reset-password').post(resetPasswordCTLR);
+router.route('/verify-email').post();
+router.route('/forgot-password').post(resetPasswordCTLR);
 
-router.route('/new-password').post(validateOtpMW, regeneratePasswordCTLR);
+router.route('/reset-password').post(verifyOtpMW, regeneratePasswordCTLR);
 
 export default router;

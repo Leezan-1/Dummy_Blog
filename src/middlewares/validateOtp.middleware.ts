@@ -3,18 +3,17 @@ import jwt from 'jsonwebtoken';
 
 // schemas, interfaces & enums
 import { JwtPayload } from "jsonwebtoken";
-import { OtpPurpose } from "../enums/OtpPurpose.enum";
+import { OtpPurpose } from "../constants/enums";
 
 // models and services
 import { Otp } from "../models/Otp";
-import { AuthService } from '../services/Auth.service';
 
 // utility functions & classes
 import CustomError from "../utils/CustomError.utils";
 import wrapRequestFunction from "../utils/wrapRequestFunction.utils";
 import AuthenticatedRequest from '../interfaces/AuthenticatedRequest.interface';
 
-export const validateOtpMW = wrapRequestFunction(async (req: AuthenticatedRequest, res, next) => {
+export const verifyOtpMW = wrapRequestFunction(async (req: AuthenticatedRequest, res, next) => {
 
     let { otpToken } = req.body;
     let payload: JwtPayload;
@@ -29,6 +28,8 @@ export const validateOtpMW = wrapRequestFunction(async (req: AuthenticatedReques
     } catch (error) {
         if (error instanceof jwt.TokenExpiredError) {
             dbToken.destroy(); //deletes otp token  from database if exceeds time
+
+            throw new CustomError(406, "otp token expired!")
         }
         throw error;
     }

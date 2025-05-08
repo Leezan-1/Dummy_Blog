@@ -1,26 +1,19 @@
 // built-in & third party modules
 
+// constants and enums
+import { COOKIE_OPTIONS } from "../constants/Variables";
 // schemas, interfaces & enums
-import { CookieOptions } from "express";
 import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
-import { LoginFormSchema, SignUpFormSchema } from "../schemas/userForm.schema";
+import { LoginFormSchema, SignUpFormSchema } from "../schemas/multipleFieldsForm.schema";
 
 // models and services
 import AuthService from "../services/Auth.service";
-import JWTService from "../services/JWT.service";
+import JWTService from "../services/Jwt.service";
+import OtpService from "../services/Otp.service";
 
 // utility functions & classes
 import { apiSuccessMsg } from "../utils/apiMessage.utils";
 import wrapRequestFunction from "../utils/wrapRequestFunction.utils";
-
-
-const COOKIE_OPTIONS: CookieOptions = {
-    signed: true,
-    secure: true,
-    httpOnly: true,
-    sameSite: "strict",
-    expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
-};
 
 export const signUpCTLR = wrapRequestFunction(async (req, res) => {
 
@@ -77,7 +70,7 @@ export const generateRefreshCTLR = wrapRequestFunction(async (req: Authenticated
 
 export const resetPasswordCTLR = wrapRequestFunction(async (req, res) => {
 
-    await AuthService.sendOtpToken(req.body?.email);
+    await OtpService.sendOtpToken(req.body?.email);
 
     // response
     const responseCode = 200;

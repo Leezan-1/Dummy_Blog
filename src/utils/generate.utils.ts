@@ -2,6 +2,7 @@
 import bcrypt from 'bcrypt';
 import slugify from "slugify";
 import crypto from "crypto";
+import otpGenerator from 'otp-generator';
 
 export function generateImageURL(filePath: string | undefined) {
     if (!filePath) return null; // Handle missing file safely
@@ -64,15 +65,10 @@ export function generateDuration(createdAt: string) {
 }
 
 export function generateOTPToken() {
-    let randomOtp = crypto.randomInt(0, 1000).toString();
-
-    if (randomOtp.length < 6) {
-        let padSize = 6 - randomOtp.length;
-
-        let padOtp = crypto.randomInt(0, Math.pow(10, padSize)).toString();
-
-        return parseInt(padOtp + randomOtp);
-    }
-
-    return parseInt(randomOtp);
+    return otpGenerator.generate(6, {
+        digits: true,
+        lowerCaseAlphabets: false,
+        upperCaseAlphabets: false,
+        specialChars: false
+    })
 }
