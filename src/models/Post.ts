@@ -4,6 +4,7 @@ import { Tag } from './Tag';
 import { User } from './User';
 import { Post_Tag } from './Post_Tag';
 import { Post_Images } from './Post_Images';
+import { Post_Comments } from './Post_Comments';
 
 @Scopes(() => ({
 
@@ -149,6 +150,9 @@ export class Post extends Model {
 
     @HasMany(() => Post_Images, { as: "images" })
     images!: Post_Images[];
+
+    @HasMany(() => Post_Comments)
+    comments!: Post_Comments[];
 
     @BelongsToMany(() => Tag, {
         through: () => Post_Tag,  // Through model

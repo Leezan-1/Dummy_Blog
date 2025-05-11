@@ -15,6 +15,7 @@ import { Tag } from './Tag';
 import { Profile } from './Profile';
 import { Token } from './Token';
 import { Otp } from './Otp';
+import { Post_Comments } from './Post_Comments';
 
 
 const env: string = (process.env.NODE_ENV as string) || "development";
@@ -48,7 +49,7 @@ let sequelize = new Sequelize({
     username: dbConfig.username!,
     password: dbConfig.password!,
     logging: dbConfig.logging! || false,
-    models: [User, Profile, Post, Post_Images, Post_Tag, Tag, Token, Otp],
+    models: [User, Profile, Post, Post_Images, Post_Tag, Tag, Token, Otp, Post_Comments],
 });
 
 db.sequelize = sequelize;
