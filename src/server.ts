@@ -15,10 +15,11 @@ const startServer = async () => {
         // await db.sequelize.sync({ force: true });
         // await db.sequelize.sync({ alter: true });
         app.listen(process.env.PORT || 5000, () => {
-            console.log(`Server running at http://localhost:${process.env.PORT}`);
+            // console.log('process.env :>> ', process.env);
+            console.log(`Server running at ${process.env.BASE_URL!}`);
         })
-    } catch (error: any) {
-        console.error("Unable to connect to the database")
+    } catch (error) {
+        console.error("Unable to connect to the database\n", error)
     }
 }
 

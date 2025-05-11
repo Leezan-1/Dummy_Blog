@@ -103,7 +103,7 @@ export const updatePostCTLR = wrapRequestFunction(async (req: AuthenticatedReque
     }
 
     const postInfo = await PostService.getSinglePost(postId);
-    await PostService.updatePost(userId, postInfo, req.body, thumbnailImg, blogImages);
+    PostService.updatePost(userId, postInfo, req.body, thumbnailImg, blogImages);
 
     // response
     const resCode = 200;
@@ -118,7 +118,7 @@ export const deletePostCTLR = wrapRequestFunction(async (req: AuthenticatedReque
     const postId = Number(req.params?.postId!);
 
     const postInfo = await PostService.getSinglePost(postId, false);
-    await PostService.deletePost(userId, postInfo)
+    PostService.deletePost(userId, postInfo)
 
     // response
     const resCode = 200;

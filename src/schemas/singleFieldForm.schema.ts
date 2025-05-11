@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const titleRegex = /^[A-Za-z0-9\s\.,! ?'"-]*$/;
 const tagNameRegex = /^[A-Za-z]+$/;
+const otpTokenRegex = /^\d{6}$/;
 
 export const NameSchema = z.string()
     .min(2).max(50);
@@ -24,3 +25,7 @@ export const TagSchema = z.string()
     .min(2, 'tag name must be 2 character long')
     .max(20, 'tag name must not exceed 20 character')
     .regex(tagNameRegex, 'tag must be alphabet only');
+
+export const OtpSchema = z.string()
+    .length(6, 'otp token must be 6 digits')
+    .regex(otpTokenRegex, 'otp token must be 6 digits')

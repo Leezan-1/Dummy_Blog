@@ -94,7 +94,7 @@ export class PostService {
             user_id: userId
         });
 
-        if (blogImages.length) {
+        if (blogImages?.length) {
             let imageFiles = blogImages.map((image) => ({
                 post_id: post.id,
                 img_name: image.filename,
@@ -129,7 +129,7 @@ export class PostService {
         }
 
 
-        if (!thumbnailImg && !postInfo.thumbnail_path && blogImages.length)
+        if (!thumbnailImg && !postInfo?.thumbnail_path && blogImages?.length)
             thumbnailImg = blogImages?.[0];
 
         // previous thumbnail image

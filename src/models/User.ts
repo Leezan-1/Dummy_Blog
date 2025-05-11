@@ -44,14 +44,21 @@ export class User extends Model {
         unique: true,
         allowNull: false
     })
-    email!: string
+    email!: string;
+
+    @Column({
+        type: DataType.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+    })
+    verified!: boolean;
 
     @Column({
         type: DataType.STRING(50),
         allowNull: false,
         unique: true
     })
-    username!: string
+    username!: string;
 
     @Column({
         type: DataType.STRING(100),

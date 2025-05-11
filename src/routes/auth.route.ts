@@ -6,9 +6,10 @@ import {
     signUpCTLR,
     loginUserCTLR,
     logoutUserCTLR,
-    resetPasswordCTLR,
+    forgotPasswordCTLR,
     generateRefreshCTLR,
-    regeneratePasswordCTLR
+    regeneratePasswordCTLR,
+    verifyEmailCTLR
 } from '../controllers/auth.controller';
 
 // middlewares
@@ -20,6 +21,7 @@ const router = express.Router();
 
 // handles 'auth/signup' route. 
 router.route('/signup').post(signUpCTLR);
+router.route('/verify-email').post(verifyOtpMW, verifyEmailCTLR);
 
 // handles 'auth/login' route 
 router.route('/login').post(loginUserCTLR);
@@ -31,8 +33,7 @@ router.route('/logout').get(authTokenMW, logoutUserCTLR);
 router.route('/refresh').get(generateRefreshCTLR);
 
 // routes
-router.route('/verify-email').post();
-router.route('/forgot-password').post(resetPasswordCTLR);
+router.route('/forgot-password').post(forgotPasswordCTLR);
 
 router.route('/reset-password').post(verifyOtpMW, regeneratePasswordCTLR);
 

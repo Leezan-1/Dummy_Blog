@@ -26,12 +26,14 @@ class AuthService {
         return user;
     }
 
+
     static async getUserById(id: number) {
         const user = await User.findByPk(id);
         if (!user)
             throw new CustomError(401, "user does not exist");
         return user;
     }
+
 
     // signs up a new user
     static async signUpUser(signupInfo: SignUpForm) {
@@ -50,7 +52,7 @@ class AuthService {
         let username = email.split("@")[0];
 
         // creates a new user.
-        await User.create({
+        return User.create({
             first_name: fname,
             last_name: lname,
             username: username,
@@ -59,25 +61,39 @@ class AuthService {
         });
     }
 
+
     static async loginUser(loginInfo: LoginForm) {
 
         let { email, password } = LoginFormSchema.parse(loginInfo);
 
         // checks the email and password of the user in database
         let existingUser = await this.getUserByEmail(email);
+        if (!existingUser.verified)
+            throw new CustomError(401, "email is not verified");
 
         if (!existingUser || ! await checkUserPassword(password, existingUser.password))
-            throw new CustomError(403, "email or password did not match");
+            throw new CustomError(401, "email or password did not match");
 
         return existingUser;
     }
 
+    static async verifyEmail(userId: number, reqBodyEmail: string) {
+        const user = await this.getUserById(userId);
 
+        // this is because userId comes through validate Otp jwt
+        if (reqBodyEmail != user.email)
+            throw new CustomError(406, "invalid otp for given email");
+
+        if (user.verified)
+            throw new CustomError(400, "user already verified");
+
+        user.verified = true;
+        user.save();
+    }
 
     static async resetPassword(passwordFields: PasswordForm, userId: number) {
 
         let { newPassword, confirmPassword } = PasswordFormSchema.parse(passwordFields);
-
 
         const user = await this.getUserById(userId);
 

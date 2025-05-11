@@ -1,6 +1,7 @@
 // built-in & third party modules
 
 // constants and enums
+import { OtpPurpose } from "../constants/enums";
 import { COOKIE_OPTIONS } from "../constants/Variables";
 // schemas, interfaces & enums
 import AuthenticatedRequest from "../interfaces/AuthenticatedRequest.interface";
@@ -20,12 +21,30 @@ export const signUpCTLR = wrapRequestFunction(async (req, res) => {
     let parsedBody = SignUpFormSchema.parse(req.body);
 
     // creates a new user through the user signup form
-    await AuthService.signUpUser(parsedBody);
+    let newUser = await AuthService.signUpUser(parsedBody);
+    OtpService.sendOtpToken(OtpPurpose.VERIFY, parsedBody.email, newUser);
 
     //response
     const responseCode = 201;
-    const responseMsg = apiSuccessMsg(responseCode, "new user created");
+    const responseMsg = apiSuccessMsg(responseCode, "new user created successfully and otp sent to the email to verify");
     res.status(responseCode).json(responseMsg);
+});
+
+// changes the emails as verified
+export const verifyEmailCTLR = wrapRequestFunction(async (req: AuthenticatedRequest, res) => {
+
+
+    // req.user taken through AuthenticatedRequest
+    // this function needs user id and req.body
+    await AuthService.verifyEmail(req.user?.id!, req.body?.email);
+
+
+    //response
+    const responseCode = 200;
+    const responseMsg = apiSuccessMsg(responseCode, "user verified successfully");
+    res.status(responseCode).json(responseMsg);
+
+    // await 
 });
 
 export const loginUserCTLR = wrapRequestFunction(async (req, res) => {
@@ -68,9 +87,9 @@ export const generateRefreshCTLR = wrapRequestFunction(async (req: Authenticated
     res.status(responseCode).cookie('refresh-token', newToken.refresh_token, COOKIE_OPTIONS).json(responseMsg);
 });
 
-export const resetPasswordCTLR = wrapRequestFunction(async (req, res) => {
+export const forgotPasswordCTLR = wrapRequestFunction(async (req, res) => {
 
-    await OtpService.sendOtpToken(req.body?.email);
+    await OtpService.sendOtpToken(OtpPurpose.RESET, req.body?.email);
 
     // response
     const responseCode = 200;
